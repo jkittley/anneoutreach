@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="/static/css/base.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/vis.min.css" type="text/css"/>
+
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootbox.min.js"></script>
+    <script src="/static/js/vis.min.js"></script>
+
+    <script type="text/javascript" src="/static/js/socket.io.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        // Global data used by all charts and outputs
+        var matrix  = {};
+        var graph = null;
+
+        maxX = 80;
+        maxY = 50;
+
+        var makeSurface = function() {
+            var surface = [];
+            for (var x = 0; x < maxX; x++) {
+                for (var y = 0; y < maxY; y++) {
+                    var value = getFromMatrix(x, y);
+                    surface.push({ x: x, y: y, z: value, style: value });
+                }
+            }
+            return surface;
+        }
+
+
+        // Update the global data
+        var updateGlobalData= function(newData) {
+            matrix[newData.x+','+newData.y] = newData.z * 10;
+        }
+
+        var getFromMatrix = function(x,y) {
+            var key = x+','+y;
+            if(matrix.hasOwnProperty(key)) {
+                return matrix[key];
+            }
+            return 0;
+        }
+
+        var reDraw = function() {
+            var data = new vis.DataSet(makeSurface());
+            graph.setData(data);
+            graph.redraw();
+        }
+
+        var timer = setInterval(reDraw, 500);
+        //
+        // Websocket
+        //
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('connect', function() {
+            console.log('Connected');
+            socket.emit('my event', {data: 'I\'m connected!'});
+            socket.on('newdata', function(data) { updateGlobalData(data) });
+            drawVisualization();
+        });
+
+        socket.on('disconnect', function() {
+            bootbox.dialog({
+                message: "The connection to the server has failed",
+                title: "Connection failed",
+                buttons: {
+                    main: {
+                        label: "Refresh Page",
+                        className: "btn-success",
+                        callback: function() {
+                            location.reload();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Called when the Visualization API is loaded.
+        function drawVisualization() {
+
+            var container = document.getElementById('mygraph');
+            var w = 1000; //$( document ).width();
+            var h = 500; //$( document ).height();
+
+            // create some nice looking data with sin/cos
+            var data = new vis.DataSet(makeSurface());
+
+
+
+            // specify options
+            var options = {
+                width:  w,
+                height: h,
+                style: 'surface',
+                showPerspective: true,
+                showGrid: true,
+                showShadow: false,
+                keepAspectRatio: true,
+                verticalRatio: 0.5,
+            };
+
+              // create our graph
+
+              graph = new vis.Graph3d(container, data, options);
+
+            $('#mygraph').children(":first").css('height','90%');
+
+            }
+
+    </script>
+
+    <style>
+        html, body, #mygraph {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="mygraph"></div>
+
+</body>
+</html>

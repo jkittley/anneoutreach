@@ -16,6 +16,11 @@ socketio = SocketIO(app)
 def index():
     return render_template('index.html')
 
+@app.route('/surface')
+def surface():
+    return render_template('surfaceVis.html')
+
+
 @app.route('/test/')
 def test():
     x = math.floor(random.random() * 20) + 1

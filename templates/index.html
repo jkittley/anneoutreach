@@ -13,6 +13,7 @@
     <script src="/static/js/d3.min.js"></script>
     <script src="/static/js/c3.min.js"></script>
     <script src="/static/js/bootbox.min.js"></script>
+    <script src="/static/js/surface.js"></script>
 
     <script type="text/javascript" src="/static/js/socket.io.js"></script>
 
@@ -21,6 +22,8 @@
         //
         // Global data used by all charts and outputs
         //
+        var maxHistory = 250;
+        var matrix = {}
 
         var global_data = {
             'time_axis': [],
@@ -35,6 +38,11 @@
             global_data.data_x.push(newData.x)
             global_data.data_y.push(newData.y)
             global_data.data_z.push(newData.z)
+            if (global_data.time_axis.length > maxHistory) global_data.time_axis.shift();
+            if (global_data.time_axis.length > maxHistory) global_data.data_x.shift();
+            if (global_data.time_axis.length > maxHistory) global_data.data_y.shift();
+            if (global_data.time_axis.length > maxHistory) global_data.data_z.shift();
+            console.log(global_data.time_axis.length);
             updateCharts();
         }
 
@@ -128,5 +136,6 @@
 
 <div id="chart"></div>
 
+HELLO
 </body>
 </html>
