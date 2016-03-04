@@ -22,15 +22,15 @@ void loop() {
     
     // Create three different waveforms
     float x = sin(rad) * 100;
-    float y = cos(rad) * 100;
-    float z = tan(rad) * 100;
+    float y = sin(rad - PI/2 ) * 100;
+    float z = sin(rad - PI/4) * 100;
     
     // Output the values to the serial port
     sendJSON(x,y,z);
 
     // Increase Angle and reset to zero if needed
-    angle++;
-    if (angle > 360) {
+    angle += 15;
+    if (angle > 345) {
       angle = 0;
     }
      

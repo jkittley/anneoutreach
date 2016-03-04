@@ -10,21 +10,29 @@ class SerialMonitor:
     socketCon = None
     serialCon = None
 
+    # Helper functions to colour text output to command line
     def concat_args(self, *arg):
-        s = []
+        s = ""
         for a in arg:
-            s.append(str(a.__str__()))
+            s = s + " " + str(a)
         return s
 
+    def titlemsg(self, *arg):
+        print(colored(self.concat_args(*arg), 'yellow'))
+
     def errmsg(self, *arg):
-        print(colored(self.concat_args(arg), 'red'))
+        print(colored(self.concat_args(*arg), 'red'))
 
     def infomsg(self, *arg):
-        print(colored(self.concat_args(arg), 'blue'))
+        print(colored(self.concat_args(*arg), 'blue'))
 
     def optionmsg(self, *arg):
-        print(colored(self.concat_args(arg), 'blue'))
+        print(colored(self.concat_args(*arg), 'blue'))
 
+    def jsonmsg(self, *arg):
+        print(colored(self.concat_args(*arg), 'cyan'))
+
+    # Program loop which reads the serial port and pushes valid Json to Web socket
     def read_loop(self):
         # Read Serial loop
         while True:
@@ -40,6 +48,7 @@ class SerialMonitor:
         serialLine = self.serialCon.readline().decode()
         try:
             jsonStr = json.loads(serialLine)
+            self.jsonmsg(jsonStr)
         except ValueError:
             self.errmsg("invalid Json string:", serialLine)
             return
@@ -47,11 +56,11 @@ class SerialMonitor:
 
     # Detect when script terminated and close socket
     def signal_handler(self, given_signal):
-        try:
-            if self.serialCon is not None:
+        if self.serialCon is not None:
+            try:
                 self.serialCon.close()
-        except serial.serialutil.SerialException:
-            pass
+            except serial.serialutil.SerialException:
+                pass
 
         self.infomsg('Closing connections...')
         if self.socketCon is not None:
@@ -137,7 +146,7 @@ class SerialMonitor:
         ports = self.list_serial_ports()
         port = None
 
-        self.infomsg(">>>> Serial Port Monitor <<<<")
+        self.titlemsg(">>>> Serial Port Monitor <<<<")
         # Auto pick a port
         if not autooff:
             port = self.auto_port_picket(ports)
@@ -178,7 +187,7 @@ class SerialMonitor:
 @click.option('--autooff', is_flag=True, default=False, help='Turn off auto port selection')
 def main(autooff):
     sm = SerialMonitor(autooff)
-    # signal.signal(signal.SIGINT, sm.signal_handler)
+    signal.signal(signal.SIGINT, sm.signal_handler)
 
 if __name__ == '__main__':
     main()
