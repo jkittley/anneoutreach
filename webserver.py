@@ -1,33 +1,31 @@
-from datetime import datetime
 import json
 import random
-from flask import Flask, render_template
-from flask_socketio import SocketIO, send, emit
-import math
 import asyncio
 import concurrent
 import time
+from datetime import datetime
+from flask import Flask, render_template
+from flask_socketio import SocketIO, send, emit
+from config import *
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app)
 
+#
+# URL Routing
+#
+
+# Index Page
 @app.route('/')
 def index():
     return render_template('index.html')
 
+# Surface plot
 @app.route('/surface')
 def surface():
     return render_template('surfaceVis.html')
 
-
-@app.route('/test/')
-def test():
-    x = math.floor(random.random() * 20) + 1
-    y = math.floor(random.random() * 20) + 1
-    z = math.floor(random.random() * 20) + 1
-    send_data(x, y, z);
-    return "Test data sent"
 
 #
 # Message receivers
@@ -40,7 +38,7 @@ def handle_message(message):
 
 
 # Test event
-@socketio.on('incomming')
+@socketio.on('new_serial_data')
 def handle_json(json):
     send_data(json['x'], json['y'], json['z'])
     print('received json: ' + str(json))
@@ -48,7 +46,6 @@ def handle_json(json):
 #
 # Send Message
 #
-
 
 def send_data(x, y, z):
     t = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -61,7 +58,7 @@ def send_data(x, y, z):
 
 if __name__ == '__main__':
     app.debug = True
-    socketio.run(app)
+    socketio.run(app, port=WEB_SERVER_PORT)
 
 
 
