@@ -26,7 +26,6 @@ def index():
 def surface():
     return render_template('surfaceVis.html')
 
-
 #
 # Message receivers
 #
@@ -40,17 +39,16 @@ def handle_message(message):
 # Test event
 @socketio.on('new_serial_data')
 def handle_json(json):
-    send_data(json['x'], json['y'], json['z'])
+    send_json(json)
     print('received json: ' + str(json))
 
 #
 # Send Message
 #
 
-def send_data(x, y, z):
-    t = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    socketio.emit('newdata', { 't': t, 'x': x, 'y':y, 'z':z })
-
+def send_json(jsondata):
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    socketio.emit('update', { 'timestamp': timestamp, 'data': jsondata })
 
 #
 # Start App

@@ -1,6 +1,3 @@
-/**
- * Created by jacob on 26/02/16.
- */
 (function(){
     var Surface=function(node){
         var heightFunction,colorFunction,timer,timer,transformPrecalc=[];

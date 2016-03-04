@@ -14,16 +14,25 @@
     <script src="/static/js/vis.min.js"></script>
 
     <script type="text/javascript" src="/static/js/socket.io.js"></script>
+    <script type="text/javascript" src="/static/js/socketManager.js"></script>
 
     <script type="text/javascript" charset="utf-8">
 
         // Global data used by all charts and outputs
         var matrix  = {};
         var graph = null;
+        maxX = 110;
+        maxY = 110;
 
-        maxX = 80;
-        maxY = 50;
+        // Update the global data
+        var updateGlobalData= function(newData) {
+            var x = Math.abs(parseInt(newData.data.x));
+            var y = Math.abs(parseInt(newData.data.y));
+            var z = Math.abs(parseInt(newData.data.z));
+            matrix[x+','+y] = z;
+        }
 
+        // Make a surface from the matrix data
         var makeSurface = function() {
             var surface = [];
             for (var x = 0; x < maxX; x++) {
@@ -35,54 +44,21 @@
             return surface;
         }
 
-
-        // Update the global data
-        var updateGlobalData= function(newData) {
-            matrix[newData.x+','+newData.y] = newData.z * 10;
-        }
-
+        // Get a value from the matrix
         var getFromMatrix = function(x,y) {
             var key = x+','+y;
-            if(matrix.hasOwnProperty(key)) {
-                return matrix[key];
-            }
+            if(matrix.hasOwnProperty(key)) return matrix[key];
             return 0;
         }
 
+        // Redraw the plot
         var reDraw = function() {
             var data = new vis.DataSet(makeSurface());
-            graph.setData(data);
-            graph.redraw();
+            if (data !==null) {
+                graph.setData(data);
+                graph.redraw();
+            }
         }
-
-        var timer = setInterval(reDraw, 500);
-        //
-        // Websocket
-        //
-
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-        socket.on('connect', function() {
-            console.log('Connected');
-            socket.emit('my event', {data: 'I\'m connected!'});
-            socket.on('newdata', function(data) { updateGlobalData(data) });
-            drawVisualization();
-        });
-
-        socket.on('disconnect', function() {
-            bootbox.dialog({
-                message: "The connection to the server has failed",
-                title: "Connection failed",
-                buttons: {
-                    main: {
-                        label: "Refresh Page",
-                        className: "btn-success",
-                        callback: function() {
-                            location.reload();
-                        }
-                    }
-                }
-            });
-        });
 
         // Called when the Visualization API is loaded.
         function drawVisualization() {
@@ -93,8 +69,6 @@
 
             // create some nice looking data with sin/cos
             var data = new vis.DataSet(makeSurface());
-
-
 
             // specify options
             var options = {
@@ -108,13 +82,21 @@
                 verticalRatio: 0.5,
             };
 
-              // create our graph
-
-              graph = new vis.Graph3d(container, data, options);
-
+            // create our graph
+            graph = new vis.Graph3d(container, data, options);
+            // Height bug fix
             $('#mygraph').children(":first").css('height','90%');
+        }
 
-            }
+        // On document ready
+        $(document).ready(function() {
+            drawVisualization();
+            // Web socket setup
+            sm = new SocketManager(updateGlobalData);
+            sm.connect();
+            // Redraw refresh - no a callback because data can come to fast
+            var timer = setInterval(reDraw, 500);
+        });
 
     </script>
 

@@ -15,6 +15,8 @@
     <script src="/static/js/surface.js"></script>
 
     <script type="text/javascript" src="/static/js/socket.io.js"></script>
+    <script type="text/javascript" src="/static/js/socketManager.js"></script>
+
 
     <script type="text/javascript" charset="utf-8">
 
@@ -24,7 +26,7 @@
 
         // Update the global data
         var updateGlobalData= function(newData) {
-            matrix[newData.x+','+newData.y] = newData.z * -10;
+            matrix[newData.data.x+','+newData.data.y] = newData.data.z * -10;
             if (md!==null)
                 md.data([ dataFromFormular(getFromMatrix) ] )
                 .transition();
@@ -37,35 +39,6 @@
             }
             return 0;
         }
-
-        //
-        // Websocket
-        //
-
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-        socket.on('connect', function() {
-            console.log('Connected');
-            socket.emit('my event', {data: 'I\'m connected!'});
-            socket.on('newdata', function(data) { updateGlobalData(data) });
-            initSurface();
-        });
-
-        socket.on('disconnect', function() {
-            bootbox.dialog({
-                message: "The connection to the server has failed",
-                title: "Connection failed",
-                buttons: {
-                    main: {
-                        label: "Refresh Page",
-                        className: "btn-success",
-                        callback: function() {
-                            location.reload();
-                        }
-                    }
-                }
-            });
-        });
-
 
         var yaw=0.5,
                 pitch=0.5,
@@ -120,7 +93,9 @@
             });
         }
 
-
+{#         // Web socket setup#}
+{#        sm = new SocketManager(updateGlobalData);#}
+{#        sm.connect();#}
 
 
     </script>
