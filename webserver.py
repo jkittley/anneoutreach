@@ -24,7 +24,13 @@ def index():
 # Surface plot
 @app.route('/surface')
 def surface():
-    return render_template('surfaceVis.html')
+    return render_template('surface.html')
+
+# Surface plot
+@app.route('/spotlight')
+def spotlight():
+    return render_template('spotlight.html')
+
 
 #
 # Message receivers
