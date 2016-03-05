@@ -19,7 +19,18 @@ socketio = SocketIO(app)
 # Index Page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    menu = [
+        {"name": "Time Series" , "url": "/time" },
+        {"name": "3D Surface" , "url": "/surface" },
+        {"name": "Spotlight" , "url": "/spotlight" },
+        {"name": "Trail" , "url": "/trail" },
+    ]
+    return render_template('index.html', menu=menu)
+
+# Time Series Page
+@app.route('/time')
+def timeseries():
+    return render_template('timeseries.html')
 
 # Surface plot
 @app.route('/surface')
@@ -32,7 +43,7 @@ def spotlight():
     return render_template('spotlight.html')
 
 # Trail plot
-@app.route('/spotlight')
+@app.route('/trail')
 def trail():
     return render_template('trail.html')
 
