@@ -11,6 +11,7 @@ class SerialMonitor:
 
     socketCon = None
     serialCon = None
+    test = { 'x':0, 'y':0 }
 
     # Helper functions to colour text output to command line
     def concat_args(self, *arg):
@@ -68,9 +69,15 @@ class SerialMonitor:
 
     # Generate a line of test data
     def read_test_data(self, mode):
-        x = random.randint(0, 100)
-        y = random.randint(0, 100)
+        x = self.test['x']
+        y = self.test['y']
         z = random.randint(0, 100)
+        self.test['x'] +=1
+        self.test['y'] +=1
+        if self.test['x'] > TABLE_WIDTH:
+            self.test['x'] = 0
+        if self.test['y'] > TABLE_DEPTH:
+            self.test['y'] = 0
         return {'x': x, 'y': y, 'z': z}
 
     # Detect when script terminated and close socket

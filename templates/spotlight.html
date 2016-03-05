@@ -5,29 +5,22 @@
     $(document).ready(function() {
 
         var elemId = "canvas";
+        var table_width = {{ table_width }};
+        var table_depth = {{ table_depth }};
 
         var $canvas=$("#"+elemId);
         var ctx= document.getElementById(elemId).getContext("2d");
-        var canvasOffset=$canvas.offset();
-        var offsetX=canvasOffset.left;
-        var offsetY=canvasOffset.top;
-        var scrollX=$canvas.scrollLeft();
-        var scrollY=$canvas.scrollTop();
-
+        document.getElementById(elemId).width  = $canvas.width();
+        document.getElementById(elemId).height = $canvas.height();
         var cw = $canvas.width();
         var ch = $canvas.height();
         var cx = 50;
         var cy = 50;
-        var radius = 50;
+        var radius = 100;
         var PI2 = Math.PI*2;
 
         var img = new Image();
-        img.onload=function(){
-            requestAnimationFrame(animate);
-        };
         img.src = "/static/img/spotlight.jpg";
-        //img.src=document.getElementById('source').src;
-
 
         function draw(){
             ctx.clearRect(0,0,cw,ch);
@@ -37,20 +30,27 @@
             ctx.closePath();
             ctx.stroke();
             ctx.clip();
-            ctx.drawImage(img,0,0);
+{#            ctx.drawImage(img,0,0);#}
+            ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, cw, ch);
             ctx.restore();
+            //ctx.beginPath();
+            //ctx.lineTo(cx, cy);
+            //ctx.stroke();
+            //ctx.closePath();
         }
 
-        function animate(time){
-            if(cx-radius>cw || cy-radius>ch){return;}
-            requestAnimationFrame(animate);
-            cx+=0.2;
-            cy+=0.2;
+        // Web socket setup
+        sm = new SocketManager(function(newdata) {
+            cx = parseInt((newdata.data.x / table_width) * cw);
+            //cx = newdata.data.x;
+            cy = parseInt((newdata.data.y / table_depth) * ch);
+            //cy = newdata.data.y;
+            console.log([cx,cy,table_width,table_width]);
             draw();
-        }
+        });
+        sm.connect();
 
     });
-
     </script>
 {% endblock %}
 
@@ -64,7 +64,6 @@ body{
     width: 100vw;
     height: 100vh;
 }
-
 </style>
 {% endblock %}
 
