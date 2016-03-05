@@ -26,10 +26,15 @@ def index():
 def surface():
     return render_template('surface.html')
 
-# Surface plot
+# Spotlight plot
 @app.route('/spotlight')
 def spotlight():
     return render_template('spotlight.html')
+
+# Trail plot
+@app.route('/spotlight')
+def trail():
+    return render_template('trail.html')
 
 
 #
