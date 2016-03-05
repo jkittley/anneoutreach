@@ -3,12 +3,18 @@ import random
 import asyncio
 import concurrent
 import time
+import os
+from unipath import Path
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, abort
 from flask_socketio import SocketIO, send, emit
 from config import *
 
+UPLOAD_FOLDER = 'static/img'
+ALLOWED_EXTENSIONS = set(['jpg', 'jpeg'])
+
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app)
 
@@ -52,7 +58,28 @@ def trail():
 def inject_defaults():
     return { "table_width": TABLE_WIDTH, 'table_depth': TABLE_DEPTH }
 
-#
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    saveRoot = os.path.join(os.path.dirname(os.path.realpath(__file__)), app.config['UPLOAD_FOLDER'])
+    msg = ''
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            if "spotlight" in request.form:
+                filename = "spotlight.jpg"
+            elif "trail" in request.form:
+                filename = "trail.jpg"
+            else:
+                abort(500)
+            file.save(Path(saveRoot).child(filename))
+            msg = 'Image uploaded: '+filename
+
+    return render_template('settings.html', message=msg)
+
 # Message receivers
 #
 
