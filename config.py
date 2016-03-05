@@ -21,3 +21,7 @@ CONNECTION_TIMEOUT = 10
 
 # After connection established time to wait for init (in seconds)
 CONNECTION_WAIT = 2
+
+# Physical
+TABLE_WIDTH = 100
+TABLE_DEPTH = 50

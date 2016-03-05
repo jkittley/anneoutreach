@@ -1,9 +1,11 @@
 import glob, serial, time, signal, sys, json, click
 from datetime import datetime
+import random
 import requests
 from socketIO_client import SocketIO, LoggingNamespace
 from config import *
 from termcolor import colored
+
 
 class SerialMonitor:
 
@@ -33,26 +35,43 @@ class SerialMonitor:
         print(colored(self.concat_args(*arg), 'cyan'))
 
     # Program loop which reads the serial port and pushes valid Json to Web socket
-    def read_loop(self):
+    def read_loop(self, test):
         # Read Serial loop
         while True:
-            if self.socketCon is not None and self.serialCon is not None:
-                self.read_serial()
-                time.sleep(SAMPLE_INTERVAL / 1000)
+            # Read form serial port
+            if self.socketCon is not None:
+                if test == 0 and self.serialCon is not None:
+                    jsonStr = self.read_serial()
+                elif test > 0:
+                    jsonStr = self.read_test_data(test)
+                else:
+                    self.errmsg("Serial not open yet")
+                    time.sleep(5)
+                    continue
+                # Send data to web socket
+                self.jsonmsg(jsonStr)
+                self.socketCon.emit('new_serial_data', jsonStr)
+            # Read from test data generator
             else:
-                self.infomsg("Socket or Serial not open yet")
-                time.sleep(5)
+                self.errmsg("Web socket not open yet")
+            # Sleep for sample interval
+            time.sleep(SAMPLE_INTERVAL / 1000)
 
     # Read in a line, check that is decodes as JSON and then forward to web socket
     def read_serial(self):
         serialLine = self.serialCon.readline().decode()
         try:
-            jsonStr = json.loads(serialLine)
-            self.jsonmsg(jsonStr)
+            return json.loads(serialLine)
         except ValueError:
             self.errmsg("invalid Json string:", serialLine)
             return
-        self.socketCon.emit('new_serial_data', jsonStr)
+
+    # Generate a line of test data
+    def read_test_data(self, mode):
+        x = random.randint(0, 100)
+        y = random.randint(0, 100)
+        z = random.randint(0, 100)
+        return {'x': x, 'y': y, 'z': z}
 
     # Detect when script terminated and close socket
     def signal_handler(self, given_signal):
@@ -138,15 +157,26 @@ class SerialMonitor:
         else:
             return False
 
+    # Configure web socket
+    def config_websocket(self):
+        # Test web server exists
+        server_exists = self.test_for_webserver()
+        if not server_exists:
+            self.errmsg("Failed to connect to web server, is it running?")
+            sys.exit(0)
+        # Connect to web socket
+        self.infomsg('Connecting to socket')
+        self.socketCon = SocketIO('localhost', WEB_SERVER_PORT)
+        while not self.socketCon.connected:
+            self.infomsg("Waiting for connection")
+            time.sleep(CONNECTION_WAIT)
 
-    # Main function called when script executed
-    def __init__(self, autooff):
-
-        # List ports
+    # Configure Serial connection
+    def config_serial(self, autooff):
+         # List ports
         ports = self.list_serial_ports()
         port = None
 
-        self.titlemsg(">>>> Serial Port Monitor <<<<")
         # Auto pick a port
         if not autooff:
             port = self.auto_port_picket(ports)
@@ -155,19 +185,6 @@ class SerialMonitor:
         if port is None:
             port = self.manual_port_picker(ports)
 
-        # Test web server exists
-        server_exists = self.test_for_webserver()
-        if not server_exists:
-            self.errmsg("Failed to connect to web server, is it running?")
-            sys.exit(0)
-
-        # Connect to web socket
-        self.infomsg('Connecting to socket')
-        self.socketCon = SocketIO('localhost', WEB_SERVER_PORT)
-        while not self.socketCon.connected:
-            self.infomsg("Waiting for connection")
-            time.sleep(CONNECTION_WAIT)
-
         # Serial
         self.infomsg('Connecting to serial port')
         self.serialCon = serial.Serial(port, SERIAL_RATE, timeout=CONNECTION_TIMEOUT)
@@ -175,9 +192,20 @@ class SerialMonitor:
             self.infomsg("waiting for connection")
             time.sleep(CONNECTION_WAIT)
 
-        # Run serial loop
+    # Main function called when script executed
+    def __init__(self, autooff, test):
+        self.titlemsg(">>>> Serial Port Monitor <<<<")
+        test = int(test)
+        print(test)
+
+        # Config websocket
+        self.config_websocket()
+        # Config serial
+        if test == 0:
+            self.config_serial(autooff)
+        # Start
         self.infomsg('Starting...')
-        self.read_loop()
+        self.read_loop(test)
         return
 
 # -----------------------------------------------------------------------------
@@ -185,8 +213,9 @@ class SerialMonitor:
 
 @click.command()
 @click.option('--autooff', is_flag=True, default=False, help='Turn off auto port selection')
-def main(autooff):
-    sm = SerialMonitor(autooff)
+@click.option('--test', default=0, help='Generate Test Data')
+def main(autooff, test):
+    sm = SerialMonitor(autooff, test)
     signal.signal(signal.SIGINT, sm.signal_handler)
 
 if __name__ == '__main__':

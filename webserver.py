@@ -36,6 +36,10 @@ def spotlight():
 def trail():
     return render_template('trail.html')
 
+# Default context vars for all templates
+@app.context_processor
+def inject_defaults():
+    return { "table_width": TABLE_WIDTH, 'table_depth': TABLE_DEPTH }
 
 #
 # Message receivers

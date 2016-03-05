@@ -7,14 +7,14 @@
         // Global data used by all charts and outputs
         var matrix  = {};
         var graph = null;
-        maxX = 70;
-        maxY = 70;
+        maxX = {{ table_width }};
+        maxY = {{ table_depth }};
 
         // Update the global data
         var updateGlobalData= function(newData) {
-            var x = 33 + parseInt(newData.data.x / 3);
-            var y = 33 + parseInt(newData.data.y / 3);
-            var z = 33 + parseInt(newData.data.z / 3);
+            var x = parseInt(newData.data.x);
+            var y = parseInt(newData.data.y);
+            var z = parseInt(newData.data.z);
             matrix[x+','+y] = z;
         }
 
