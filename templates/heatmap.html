@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block script %}
+    <script src="/static/js/heatmap.min.js"></script>
+    <script>
+    var max = 0;
+
+    $(document).ready(function() {
+
+        // now generate some random data
+        var elemId = "heatmap";
+        var table_width = {{ table_width }};
+        var table_depth = {{ table_depth }};
+        var $canvas=$("#"+elemId);
+        var cw = $canvas.width();
+        var ch = $canvas.height();
+
+        var heatmapInstance = h337.create({
+            container: document.querySelector('#'+elemId),
+            backgroundColor: 'rgba(0,76,153,1)',
+            gradient: {
+                '.5': 'blue',
+                '.8': 'red',
+                '.95': 'white'
+              },
+        });
+
+        // Web socket setup
+        sm = new SocketManager(function(newdata) {
+            var dataPoint = {
+                x: parseInt((newdata.data.x / table_width) * cw),
+                y: parseInt((newdata.data.y / table_depth) * ch),
+                value: newdata.data.z,
+            };
+            heatmapInstance.addData(dataPoint);
+            if (newdata.data.z > max) {
+                max = newdata.data.z;
+                heatmapInstance.setDataMax(newdata.data.z);
+            }
+        });
+        sm.connect();
+
+    });
+    </script>
+{% endblock %}
+
+{% block style %}
+<style>
+#heatmap{
+    width: 100vw;
+    height: 100vh;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+        <div id="heatmap"></div>
+{% endblock %}
+

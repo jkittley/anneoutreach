@@ -30,6 +30,7 @@ def index():
         {"name": "3D Surface" , "url": "/surface" },
         {"name": "Spotlight" , "url": "/spotlight" },
         {"name": "Trail" , "url": "/trail" },
+        {"name": "Heatmap" , "url": "/heatmap" }
     ]
     return render_template('index.html', menu=menu)
 
@@ -52,6 +53,11 @@ def spotlight():
 @app.route('/trail')
 def trail():
     return render_template('trail.html')
+
+# Trail plot
+@app.route('/heatmap')
+def heatmap():
+    return render_template('heatmap.html')
 
 # Default context vars for all templates
 @app.context_processor
