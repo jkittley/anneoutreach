@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block script %}
+    <script src="/static/js/d3.min.js"></script>
+    <script src="/static/js/c3.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        var chartX = null;
+        var chartY = null;
+
+        var init_matrix = function(max) {
+            var matrix = [];
+            for (var i=0; i<max; i++) {
+                matrix[i] = 0;
+            }
+            return matrix;
+        };
+
+        var table_width = {{ table_width }};
+        var table_depth = {{ table_depth }};
+        var matrix_x = init_matrix(table_width);
+        var matrix_y = init_matrix(table_depth);
+
+        // Update the global data
+        var updateGlobalData= function(newData) {
+            var x = parseInt(newData.data.x);
+            var y = parseInt(newData.data.y);
+            var z = parseInt(newData.data.z);
+            matrix_x[x] = z;
+            matrix_y[y] = z;
+            updateCharts();
+        }
+
+        // Callback after global data is updated
+        var updateCharts = function() {
+            chartX.load({ columns: [['data1'].concat(matrix_x)] });
+            chartY.load({ columns: [['data1'].concat(matrix_y)] });
+        }
+
+        // On load
+        $(document).ready(function() {
+
+            // Chart X
+            chartX = c3.generate({
+                 bindto: '#chartX',
+                 data: {
+                     columns: [['data1'].concat(matrix_x)],
+                     type: 'area',
+                     names: {
+                         data1: 'Height'
+                     },
+
+                 },
+                 color: {
+                    pattern: ['#ff7f0e']
+                 }
+            });
+
+            // Chart Y
+            chartY = c3.generate({
+                 bindto: '#chartY',
+                 data: {
+                     columns: [['data1'].concat(matrix_y)],
+                     type: 'area',
+                     names: {
+                         data1: 'Height'
+                     }
+                 },
+                 color: {
+                     pattern: ['#2ca02c']
+                 }
+
+            });
+
+            // Web socket setup
+            sm = new SocketManager(updateGlobalData);
+            sm.connect();
+        });
+
+    </script>
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/c3.css" type="text/css"/>
+    <style>
+    body {
+        background-color: #9acfea;
+        padding: 30px;
+        padding-top: 10px;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h3>Height vs X</h3>
+    <div id="chartX"></div>
+    <h3>Height vs Y</h3>
+    <div id="chartY"></div>
+{% endblock %}

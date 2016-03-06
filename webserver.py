@@ -27,7 +27,8 @@ socketio = SocketIO(app)
 def index():
     menu = [
         {"name": "Time Series" , "url": "/time" },
-        {"name": "3D Surface" , "url": "/surface" },
+        {"name": "2D Surface" , "url": "/surface2D" },
+        {"name": "3D Surface" , "url": "/surface3D" },
         {"name": "Spotlight" , "url": "/spotlight" },
         {"name": "Trail" , "url": "/trail" },
         {"name": "Heatmap" , "url": "/heatmap" }
@@ -39,10 +40,15 @@ def index():
 def timeseries():
     return render_template('timeseries.html')
 
+# 2D Surface Plots
+@app.route('/surface2D')
+def surface2D():
+    return render_template('surface2D.html')
+
 # Surface plot
-@app.route('/surface')
-def surface():
-    return render_template('surface.html')
+@app.route('/surface3D')
+def surface3D():
+    return render_template('surface3D.html')
 
 # Spotlight plot
 @app.route('/spotlight')
