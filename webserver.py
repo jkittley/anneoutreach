@@ -121,7 +121,7 @@ def send_json(jsondata):
 
 if __name__ == '__main__':
     app.debug = True
-    socketio.run(app, port=WEB_SERVER_PORT)
+    socketio.run(app, port=WEB_SERVER_PORT, host=WEB_SERVER_ADDR)
 
 
 
