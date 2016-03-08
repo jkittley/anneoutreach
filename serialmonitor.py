@@ -63,7 +63,7 @@ class SerialMonitor:
         serialLine = self.serialCon.readline().decode()
         try:
             return json.loads(serialLine)
-        except ValueError:
+        except (ValueError, UnicodeDecodeError):
             self.errmsg("invalid Json string:", serialLine)
             return
 
