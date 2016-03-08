@@ -12,41 +12,41 @@ Older models of the Pi will work, but if you intend to use the Pi's browser to d
 latest model.
 
 Launch command line and run the following to insure the system is up-to-date
-> sudo apt-get update
+* sudo apt-get update
 
 Next make sure you have the Epiphany browser installed
-> sudo apt-get install epiphany-browser
+* sudo apt-get install epiphany-browser
 
 Check you have Python 3 and Pip installed
-> sudo apt-get install python3-pip
+* sudo apt-get install python3-pip
 
 Move to the user directory
-> cd ~/
+* cd ~/
 
 Make a new directory for the web server and move into it
-> mkdir www 
-> cd www
+* mkdir www 
+* cd www
 
 Download the project code from github
-> git clone https://github.com/jkittley/anneoutreach.git
+* git clone https://github.com/jkittley/anneoutreach.git
 
 Move into the directory 
-> cd ocean-scan
+* cd ocean-scan
 
 Install all the python requirements
-> pip3 install -r requirements.txt
+* pip3 install -r requirements.txt
 
 Copy all the files from the from useful_tools to the raspberry pi desktop 
-> cp useful_tools/*.sh ~/Desktop
+* cp useful_tools/*.sh ~/Desktop
 
 You must then make the usefull tools executable
-> chmod +x ~/Desktop/*.sh
+* chmod +x ~/Desktop/*.sh
 
 That's it, now we can launch the services.
 
 You can either run: 
-> python3 serialmonitor.py --prod &
-> sudo python3 webserver.py —prod
+* python3 serialmonitor.py --prod &
+* sudo python3 webserver.py —prod
 
 or double click on the new icons on the desktop and choose execute in terminal
 
