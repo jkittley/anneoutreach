@@ -1,12 +1,17 @@
 
-# The server address
-WEB_SERVER_ADDR = '0.0.0.0'
-WEB_SERVER_ADDR_WITH_PROTOCOL = 'http://'+WEB_SERVER_ADDR
-
-# The port used by the web server.
-# On the Pi this should be 80 and the app run as sudo, when testing locally however use 8000
-WEB_SERVER_PORT = 80
-# WEB_SERVER_PORT = 80
+# The server address when testing locally
+WEB_SERVER = {
+    "local": {
+        "host": "localhost",
+        "protocol": "http",
+        "port": 8000
+    },
+    "prod": {
+        "host": "0.0.0.0",
+        "protocol": "http",
+        "port": 80
+    }
+}
 
 # Flasks secrity key
 SECRET_KEY = 'MY_SECRET_KEY'

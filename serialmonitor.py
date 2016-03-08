@@ -12,6 +12,7 @@ class SerialMonitor:
     socketCon = None
     serialCon = None
     test = { 'x':0, 'y':0 }
+    server_settings = None
 
     # Helper functions to colour text output to command line
     def concat_args(self, *arg):
@@ -156,7 +157,7 @@ class SerialMonitor:
 
     # Test for web server
     def test_for_webserver(self):
-        url = WEB_SERVER_ADDR_WITH_PROTOCOL+":"+str(WEB_SERVER_PORT)
+        url = self.server_settings['protocol'] + "://" + self.server_settings['host']+":"+str(self.server_settings['port'])
         self.infomsg('Testing connection to: ', url)
         try:
             r = requests.get(url)
@@ -177,14 +178,14 @@ class SerialMonitor:
             sys.exit(0)
         # Connect to web socket
         self.infomsg('Connecting to socket')
-        self.socketCon = SocketIO('localhost', WEB_SERVER_PORT)
+        self.socketCon = SocketIO('localhost', self.server_settings['port'])
         while not self.socketCon.connected:
             self.infomsg("Waiting for connection")
             time.sleep(CONNECTION_WAIT)
 
     # Configure Serial connection
     def config_serial(self, autooff):
-         # List ports
+        # List ports
         ports = self.list_serial_ports()
         port = None
 
@@ -204,16 +205,19 @@ class SerialMonitor:
             time.sleep(CONNECTION_WAIT)
 
     # Main function called when script executed
-    def __init__(self, autooff, test):
+    def __init__(self, autooff, test, servermode):
+
         self.titlemsg(">>>> Serial Port Monitor <<<<")
         test = int(test)
-        print(test)
+
+        self.server_settings = WEB_SERVER[servermode]
 
         # Config websocket
         self.config_websocket()
         # Config serial
         if test == 0:
             self.config_serial(autooff)
+
         # Start
         self.infomsg('Starting...')
         self.read_loop(test)
@@ -225,8 +229,13 @@ class SerialMonitor:
 @click.command()
 @click.option('--autooff', is_flag=True, default=False, help='Turn off auto port selection')
 @click.option('--test', default=0, help='Generate Test Data')
-def main(autooff, test):
-    sm = SerialMonitor(autooff, test)
+@click.option('--prod', is_flag=True, default=False, help='Switch to production mode')
+def main(autooff, test, prod):
+    if not prod:
+        servermode = 'local'
+    else:
+        servermode = 'prod'
+    sm = SerialMonitor(autooff, test, servermode)
     signal.signal(signal.SIGINT, sm.signal_handler)
 
 if __name__ == '__main__':

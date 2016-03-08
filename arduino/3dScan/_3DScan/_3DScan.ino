@@ -4,6 +4,7 @@ const int echoPinY = 11;
 const int echoPinZ = 12;
 
 int sampleInterval = 250;
+int samples_per_reading = 30;
 int baudRate = 9600;
 
 void setup() {
@@ -40,13 +41,17 @@ void sendJSON(float x, float y, float z) {
 }
 
 float messure(int pin) {
-  pinMode(trigPin, OUTPUT);
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  return microsecondsToCentimeters(pulseIn(pin, HIGH));
+  float total = 0;
+  for(int i=0; i< samples_per_reading; i++) {
+    pinMode(trigPin, OUTPUT);
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    total = total + microsecondsToCentimeters(pulseIn(pin, HIGH));
+  }
+  return total / samples_per_reading;
 }
 
 float microsecondsToCentimeters(long microseconds) {

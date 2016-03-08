@@ -4,6 +4,7 @@ import asyncio
 import concurrent
 import time
 import os
+import click
 from unipath import Path
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, abort
@@ -119,9 +120,19 @@ def send_json(jsondata):
 # Start App
 #
 
-if __name__ == '__main__':
+@click.command()
+@click.option('--prod', is_flag=True, default=False, help='Switch to production mode')
+def main(prod):
+    if not prod:
+        servermode = 'local'
+    else:
+        servermode = 'prod'
     app.debug = True
-    socketio.run(app, port=WEB_SERVER_PORT, host=WEB_SERVER_ADDR)
+    server_settings = WEB_SERVER[servermode]
+    socketio.run(app, port=server_settings['port'], host=server_settings['host'])
+
+if __name__ == '__main__':
+   main()
 
 
 
