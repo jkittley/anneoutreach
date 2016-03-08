@@ -28,7 +28,7 @@ Make a new directory for the web server and move into it
 * cd www
 
 Download the project code from github
-* git clone https://github.com/jkittley/anneoutreach.git
+* git clone https://github.com/jkittley/ocean-scan.git
 
 Move into the directory 
 * cd ocean-scan
