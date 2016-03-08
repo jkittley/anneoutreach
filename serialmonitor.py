@@ -60,10 +60,14 @@ class SerialMonitor:
 
     # Read in a line, check that is decodes as JSON and then forward to web socket
     def read_serial(self):
-        serialLine = self.serialCon.readline().decode()
+        try:
+            serialLine = self.serialCon.readline().decode()
+        except UnicodeDecodeError:
+            self.errmsg("invalid Serial string:", serialLine)
+            return
         try:
             return json.loads(serialLine)
-        except (ValueError, UnicodeDecodeError):
+        except ValueError:
             self.errmsg("invalid Json string:", serialLine)
             return
 
