@@ -152,7 +152,7 @@ class SerialMonitor:
 
     # Test for web server
     def test_for_webserver(self):
-        url = WEB_SERVER_ADDR+":"+str(WEB_SERVER_PORT)
+        url = WEB_SERVER_ADDR_WITH_PROTOCOL+":"+str(WEB_SERVER_PORT)
         self.infomsg('Testing connection to: ', url)
         try:
             r = requests.get(url)
