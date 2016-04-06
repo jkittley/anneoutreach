@@ -4,12 +4,12 @@ const int echoPinX = 8;
 const int echoPinY = 10;
 const int echoPinZ = 9;
 
-const int PULSE_TIMEOUT_X = 6000;
-const int PULSE_TIMEOUT_Y = 6000;
-const int PULSE_TIMEOUT_Z = 3500;
+const int PULSE_TIMEOUT_X = 10000;
+const int PULSE_TIMEOUT_Y = 10000;
+const int PULSE_TIMEOUT_Z = 10000;
 
 int sampleInterval = 250;
-int samples_per_reading = 1; //30;
+int samples_per_reading = 1;
 int baudRate = 9600;
 
 void setup() {
@@ -36,24 +36,35 @@ void sendJSON(float x, float y, float z) {
 }
 
 float messure(int pin, int timeout) {
-  float total = 0;
-  for(int i=0; i< samples_per_reading; i++) {
+  //float samples[samples_per_reading];
+  // Collect samples
+  //for(int i=0; i< samples_per_reading; i++) {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
-    total = total + microsecondsToCentimeters(pulseIn(pin, HIGH, timeout));
-  }
-  
-  return total / samples_per_reading;
+    //samples[i] = microsecondsToCentimeters(pulseIn(pin, HIGH, timeout));
+    //delayMicroseconds(10);
+  //}
+  return microsecondsToCentimeters(pulseIn(pin, HIGH, timeout));
+  //return avgSamples(samples);
 }
 
 float microsecondsToCentimeters(long microseconds) {
-  return microseconds / 29 / 2;
+  return microseconds / 29.0 / 2.0;
 }
 
-void setHome() {
-  Serial.println("--> Setting Zero Point");
+float avgSamples(float samples[]) {
+  float total = 0;
+  //Serial.print("[");
+  for(int i=0; i< samples_per_reading; i++) {
+    //Serial.print(samples[i]);
+    //Serial.print(",");
+    total = total + samples[i];
+  }
+  //Serial.println("]");
+  return total / samples_per_reading;
 }
+
 
