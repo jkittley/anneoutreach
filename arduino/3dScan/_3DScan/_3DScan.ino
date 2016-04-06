@@ -1,37 +1,32 @@
-const int trigPin  = 8;
-const int echoPinX = 10;
-const int echoPinY = 11;
-const int echoPinZ = 12;
+
+const int trigPin  = 3;
+const int echoPinX = 8;
+const int echoPinY = 10;
+const int echoPinZ = 9;
+
+const int PULSE_TIMEOUT_X = 6000;
+const int PULSE_TIMEOUT_Y = 6000;
+const int PULSE_TIMEOUT_Z = 3500;
 
 int sampleInterval = 250;
-int samples_per_reading = 30;
+int samples_per_reading = 1; //30;
 int baudRate = 9600;
 
 void setup() {
   // initialize serial communication:
   Serial.begin(baudRate);
-
+  Serial.println("ONLINE");
+  pinMode(trigPin, OUTPUT);
   pinMode(echoPinX, INPUT);
   pinMode(echoPinY, INPUT);
   pinMode(echoPinZ, INPUT);
 }
 
-void loop()
-{
-  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  pinMode(trigPin, OUTPUT);
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  
-  float x = messure(echoPinX);
-  float y = messure(echoPinY);
-  float z = messure(echoPinZ);
+void loop() { 
+  float x = messure(echoPinX, PULSE_TIMEOUT_X);
+  float y = messure(echoPinY, PULSE_TIMEOUT_Y);
+  float z = messure(echoPinZ, PULSE_TIMEOUT_Z);
   sendJSON(x, y, z);
-
   delay(sampleInterval);
 }
 
@@ -40,20 +35,25 @@ void sendJSON(float x, float y, float z) {
     Serial.println(s);
 }
 
-float messure(int pin) {
+float messure(int pin, int timeout) {
   float total = 0;
   for(int i=0; i< samples_per_reading; i++) {
-    pinMode(trigPin, OUTPUT);
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
-    total = total + microsecondsToCentimeters(pulseIn(pin, HIGH));
+    total = total + microsecondsToCentimeters(pulseIn(pin, HIGH, timeout));
   }
+  
   return total / samples_per_reading;
 }
 
 float microsecondsToCentimeters(long microseconds) {
   return microseconds / 29 / 2;
 }
+
+void setHome() {
+  Serial.println("--> Setting Zero Point");
+}
+
