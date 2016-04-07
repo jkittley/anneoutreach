@@ -5,6 +5,7 @@
     <script type="text/javascript" charset="utf-8">
 
         // Global data used by all charts and outputs
+        var zoffset = 20;
         var matrix  = {};
         var graph = null;
         maxX = {{ table_width }};
@@ -14,7 +15,8 @@
         var updateGlobalData= function(newData) {
             var x = parseInt(newData.data.x);
             var y = parseInt(newData.data.y);
-            var z = parseInt(newData.data.z);
+            var z = zoffset - parseInt(newData.data.z);
+            if (z<0) z = 0;
             matrix[x+','+y] = z;
         }
 
@@ -79,6 +81,13 @@
 
         // On document ready
         $(document).ready(function() {
+
+            // Set the offset
+            var tmp = prompt("Please enter a Z offset", "20");
+            if (tmp != null) {
+                zoffset = parseInt(tmp);
+            }
+
             drawVisualization();
             // Web socket setup
             sm = new SocketManager(updateGlobalData);
