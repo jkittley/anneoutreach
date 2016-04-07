@@ -5,6 +5,7 @@
     <script src="/static/js/c3.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
+        var zoffset = 20;
         var chartX = null;
         var chartY = null;
 
@@ -25,7 +26,8 @@
         var updateGlobalData= function(newData) {
             var x = parseInt(newData.data.x);
             var y = parseInt(newData.data.y);
-            var z = parseInt(newData.data.z);
+            var z = zoffset - parseInt(newData.data.z);
+            if (z<0) z = 0;
             matrix_x[x] = z;
             matrix_y[y] = z;
             updateCharts();
@@ -39,6 +41,12 @@
 
         // On load
         $(document).ready(function() {
+
+            // Set the offset
+            var tmp = prompt("Please enter a Z offset", "20");
+            if (tmp != null) {
+                zoffset = parseInt(tmp);
+            }
 
             // Chart X
             chartX = c3.generate({
