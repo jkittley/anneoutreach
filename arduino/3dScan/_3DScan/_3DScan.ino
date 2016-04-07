@@ -17,12 +17,13 @@ const int trigPinZ = 10;
 const int echoPinZ = 11;
 
 const int PULSE_TIMEOUT = 20000;
-const int TOLLERENCE_Y_MM = 20; 
 const int TOLLERENCE_X_MM = 20; 
+const int TOLLERENCE_Y_MM = 20; 
 
-const int CARRAIGE_WIDTH = 80 + 20; // Extra 20 is for sensor lenses
-const int TABLE_MAX_X = 1020 - CARRAIGE_WIDTH;
-const int TABLE_MAX_Y = 610 - CARRAIGE_WIDTH;
+// In CM
+const int CARRAIGE_WIDTH = 8 + 2; // Extra 2 is for sensor lenses
+const int TABLE_MAX_X = 102 - CARRAIGE_WIDTH;
+const int TABLE_MAX_Y = 61 - CARRAIGE_WIDTH;
 
 const int SAMPLE_INTERVAL = 250;
 const int SAMPLES_PER_MEASURE = 20;
@@ -49,8 +50,14 @@ void setup() {
 }
 
 void loop() {  
-  float x = messureDouble(trigPinX, echoPinX, trigPinX2, echoPinX2, TABLE_MAX_X, TOLLERENCE_X_MM);
-  float y = messureDouble(trigPinY, echoPinY, trigPinY2, echoPinY2, TABLE_MAX_Y, TOLLERENCE_Y_MM);
+  float x = messureSingle(trigPinX, echoPinX);
+  if (x > TABLE_MAX_X / 2) {
+    x = messureSingle(trigPinX2, echoPinX2);
+  }
+  float y = messureSingle(trigPinY, echoPinY);
+  if (y > TABLE_MAX_Y / 2) {
+    y = messureSingle(trigPinY2, echoPinY2);
+  }
   float z = messureSingle(trigPinZ, echoPinZ);
   sendJSON(x, y, z);
 }
@@ -70,31 +77,6 @@ float messureSingle(int trigPin, int echoPin) {
   return ave.mode();
 }
 
-
-float messureDouble(int trigPin1, int echoPin1, int trigPin2, int echoPin2, int actualLength, int tolerance) {
-  int attempt = 0;
-  float m1 = 0;
-  float m2 = 0;
-  while (true) { 
-    m1 = dist(trigPin1, echoPin1);
-    delay(20);
-    m2 = dist(trigPin2, echoPin2);
-    
-    float remainder = abs(m1 + m2 - actualLength);
-    
-    if (remainder < (tolerance / 10.0)) {
-      break;
-    }
-    
-    if (attempt >= SAMPLES_PER_MEASURE) {
-        Serial.println("--> Max attempts reached");
-        break;
-    }
-  
-  } 
-  return m1;
-}
-
 float dist(int trigPin, int echoPin) {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -103,7 +85,6 @@ float dist(int trigPin, int echoPin) {
     digitalWrite(trigPin, LOW);
     return microsecondsToCentimeters(pulseIn(echoPin, HIGH, PULSE_TIMEOUT));
 }
-
 
 float microsecondsToCentimeters(long microseconds) {
   return microseconds / 29.0 / 2.0;
