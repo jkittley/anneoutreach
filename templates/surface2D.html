@@ -5,14 +5,14 @@
     <script src="/static/js/c3.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
-        var zoffset = 20;
+        var zoffset = 21;
         var chartX = null;
         var chartY = null;
 
         var init_matrix = function(max) {
             var matrix = [];
             for (var i=0; i<max; i++) {
-                matrix[i] = 0;
+                matrix[i] = null;
             }
             return matrix;
         };
@@ -43,7 +43,7 @@
         $(document).ready(function() {
 
             // Set the offset
-            var tmp = prompt("Please enter a Z offset", "20");
+            var tmp = prompt("Please enter a Z offset", zoffset);
             if (tmp != null) {
                 zoffset = parseInt(tmp);
             }
@@ -51,9 +51,14 @@
             // Chart X
             chartX = c3.generate({
                  bindto: '#chartX',
+                 axis: {
+                   y: {
+                     max: zoffset
+                   }
+                 },
                  data: {
                      columns: [['data1'].concat(matrix_x)],
-                     type: 'area',
+                     type: 'bar',
                      names: {
                          data1: 'Height'
                      },
@@ -67,9 +72,14 @@
             // Chart Y
             chartY = c3.generate({
                  bindto: '#chartY',
+                 axis: {
+                   y: {
+                     max: zoffset
+                   }
+                 },
                  data: {
                      columns: [['data1'].concat(matrix_y)],
-                     type: 'area',
+                     type: 'bar',
                      names: {
                          data1: 'Height'
                      }

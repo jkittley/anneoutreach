@@ -36,11 +36,8 @@
 
         // Web socket setup
         sm = new SocketManager(function(newdata) {
-            cx = parseInt((newdata.data.x / table_width) * cw);
-            //cx = newdata.data.x;
-            cy = parseInt((newdata.data.y / table_depth) * ch);
-            //cy = newdata.data.y;
-            console.log([cx,cy,table_width,table_width]);
+            if (newdata.data.x != null) cx = parseInt((newdata.data.x / table_width) * cw);
+            if (newdata.data.y != null) cy = parseInt((newdata.data.y / table_depth) * ch);
             draw();
         });
         sm.connect();

@@ -64,13 +64,20 @@ class SerialMonitor:
         try:
             serialLine = self.serialCon.readline().decode()
         except UnicodeDecodeError:
-            self.errmsg("invalid Serial string:", serialLine)
+            self.errmsg("invalid Serial string")
             return
+        except serial.serialutil.SerialException as e:
+            self.errmsg("Serial connection failed, pausing for 5 seconds then will try again")
+            self.config_serial(False)
+            time.sleep(5)
+            return
+
         try:
             return json.loads(serialLine)
         except ValueError:
-            self.errmsg("invalid Json string:", serialLine)
+            self.errmsg("invalid Json string")
             return
+
 
     # Generate a line of test data
     def read_test_data(self, mode):
@@ -135,13 +142,19 @@ class SerialMonitor:
         for port in ports:
             self.optionmsg(port_number, port)
             port_number+=1
-        self.optionmsg('E', "to exit")
+        self.optionmsg('R', "Refresh")
+        self.optionmsg('E', "Exit")
+
         # Wait for answer
         while True:
             try:
                 answer = input('Please select a port: ')
                 if answer.lower() == 'e':
                     sys.exit(0)
+                if answer.lower() == 'r':
+                    ports = self.list_serial_ports()
+                    return self.manual_port_picker(ports)
+
                 return ports[int(answer)-1]
             except (IndexError, UnicodeDecodeError, ValueError):
                 self.errmsg('Invalid choice please try again.')
@@ -151,7 +164,7 @@ class SerialMonitor:
         port_number = 1
         for port in ports:
             port_number += 1
-            if 'usbmodem' in port:
+            if 'usbmodem' in port or 'wchusbserial1420' in port:
                 self.infomsg("Auto selected: ", port)
                 return port
 

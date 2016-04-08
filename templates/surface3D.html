@@ -5,7 +5,7 @@
     <script type="text/javascript" charset="utf-8">
 
         // Global data used by all charts and outputs
-        var zoffset = 20;
+        var zoffset = 21;
         var matrix  = {};
         var graph = null;
         maxX = {{ table_width }};
@@ -14,11 +14,11 @@
         // Update the global data
         var updateGlobalData= function(newData) {
             var x = parseInt(newData.data.x);
-            var y = parseInt(newData.data.y);
+            var y = parseInt(maxY - newData.data.y);
             var z = zoffset - parseInt(newData.data.z);
             if (z<0) z = 0;
             matrix[x+','+y] = z;
-        }
+        };
 
         // Make a surface from the matrix data
         var makeSurface = function() {
@@ -30,14 +30,14 @@
                 }
             }
             return surface;
-        }
+        };
 
         // Get a value from the matrix
         var getFromMatrix = function(x,y) {
             var key = x+','+y;
             if(matrix.hasOwnProperty(key)) return matrix[key];
-            return 0;
-        }
+            return null;
+        };
 
         // Redraw the plot
         var reDraw = function() {
@@ -46,7 +46,7 @@
                 graph.setData(data);
                 graph.redraw();
             }
-        }
+        };
 
         // Called when the Visualization API is loaded.
         function drawVisualization() {
@@ -65,12 +65,18 @@
                 dataColor: 'green',
                 width:  w,
                 height: h,
-                style: 'bar',
+                style: 'surface',
                 showPerspective: true,
                 showGrid: true,
                 showShadow: false,
                 keepAspectRatio: true,
                 verticalRatio: 0.5,
+                zMax: zoffset,
+                cameraPosition: {
+                    horizontal: 0,
+                    vertical: 0.85,
+                    distance: 1.7
+                }
             };
 
             // create our graph
@@ -83,7 +89,7 @@
         $(document).ready(function() {
 
             // Set the offset
-            var tmp = prompt("Please enter a Z offset", "20");
+            var tmp = prompt("Please enter a Z offset", zoffset);
             if (tmp != null) {
                 zoffset = parseInt(tmp);
             }

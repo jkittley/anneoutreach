@@ -5,6 +5,7 @@
     <script src="/static/js/c3.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
+        var zoffset = 21;
         var maxHistory = 250;
         var matrix = {}
         var global_data = {
@@ -19,7 +20,9 @@
             global_data.time_axis.push(newData.timestamp)
             global_data.data_x.push(newData.data.x)
             global_data.data_y.push(newData.data.y)
-            global_data.data_z.push(newData.data.z)
+            global_data.data_z.push(Math.max(zoffset - newData.data.z, 0))
+
+
             if (global_data.time_axis.length > maxHistory) global_data.time_axis.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_x.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_y.shift();
@@ -53,8 +56,8 @@
         var buildChart1Data = function() {
             var local_data = sampleOfData(50);
             var formated = [
-                ['data_x'].concat(local_data.data_x),
-                ['data_y'].concat(local_data.data_y),
+{#                ['data_x'].concat(local_data.data_x),#}
+{#                ['data_y'].concat(local_data.data_y),#}
                 ['data_z'].concat(local_data.data_z),
             ]
             return formated
@@ -62,13 +65,25 @@
 
         $(document).ready(function() {
 
+            // Set the offset
+            var tmp = prompt("Please enter a Z offset", zoffset);
+            if (tmp != null) {
+                zoffset = parseInt(tmp);
+            }
+
             // Chart 1
             chart1 = c3.generate({
                  bindto: '#chart',
+                 axis: {
+                   y: {
+                     max: zoffset,
+                     min: zoffset,
+                   }
+                 },
                  data: {
                      names: {
-                        data_x: 'X (Left to right)',
-                        data_y: 'Y (Back to front)',
+{#                        data_x: 'X (Left to right)',#}
+{#                        data_y: 'Y (Back to front)',#}
                         data_z: 'Z (Up and down)'
                      },
                      columns: buildChart1Data()
@@ -89,5 +104,4 @@
 
 {% block content %}
     <div id="chart"></div>
-    <div id="chart2"></div>
 {% endblock %}

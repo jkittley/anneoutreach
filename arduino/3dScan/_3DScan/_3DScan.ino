@@ -1,33 +1,38 @@
 
 #include <Average.h>
 
-const int trigPinX = 2;
-const int echoPinX = 3;
 
-const int trigPinX2 = 4;
-const int echoPinX2 = 5;
+const int trigPinX = 6;
+const int echoPinX = 7;
+const int trigPinX2 = 8;
+const int echoPinX2 = 9;
 
-const int trigPinY = 6;
-const int echoPinY = 7;
-
-const int trigPinY2 = 8;
-const int echoPinY2 = 9;
+const int trigPinY = 4;
+const int echoPinY = 5;
+const int trigPinY2 = 2;
+const int echoPinY2 = 3;
 
 const int trigPinZ = 10;
 const int echoPinZ = 11;
 
-const int PULSE_TIMEOUT = 20000;
+const int PULSE_TIMEOUT = 10000;
 const int TOLLERENCE_X_MM = 20; 
 const int TOLLERENCE_Y_MM = 20; 
 
 // In CM
-const int CARRAIGE_WIDTH = 8 + 2; // Extra 2 is for sensor lenses
-const int TABLE_MAX_X = 102 - CARRAIGE_WIDTH;
-const int TABLE_MAX_Y = 61 - CARRAIGE_WIDTH;
+const int CARRAIGE_WIDTH = 6; // Extra 2 is for sensor lenses
+const int TABLE_MAX_X = 102;
+const int TABLE_MAX_Y = 61;
 
-const int SAMPLE_INTERVAL = 250;
-const int SAMPLES_PER_MEASURE = 20;
+const int SAMPLE_INTERVAL = 50;
+const int SAMPLES_PER_MEASURE = 10;
 const int BAUD_RATE = 9600;
+
+int prev_x  = 0;
+int prev_x2 = 0;
+
+int prev_y  = 0;
+int prev_y2 = 0;
 
 Average<float> ave(SAMPLES_PER_MEASURE);
 
@@ -50,20 +55,39 @@ void setup() {
 }
 
 void loop() {  
-  float x = messureSingle(trigPinX, echoPinX);
-  if (x > TABLE_MAX_X / 2) {
-    x = messureSingle(trigPinX2, echoPinX2);
-  }
-  float y = messureSingle(trigPinY, echoPinY);
-  if (y > TABLE_MAX_Y / 2) {
-    y = messureSingle(trigPinY2, echoPinY2);
-  }
+  float x  = messureSingle(trigPinX, echoPinX);
+  float x2 = messureSingle(trigPinX2, echoPinX2);
+  float y  = messureSingle(trigPinY, echoPinY);  
   float z = messureSingle(trigPinZ, echoPinZ);
+
+  if (abs(x + x2 + CARRAIGE_WIDTH - TABLE_MAX_X ) < 10) {
+    // Reading is good
+    prev_x  = x;
+    prev_x2 = x2;
+  } else {
+    // Reading is bad
+    float diff_x  = abs(prev_x  - x);
+    float diff_x2 = abs(prev_x2 - x2);
+    if (diff_x < diff_x2) {
+      // Do nothing i.e. use x as the trusted value
+    } else {
+      // Use X2 as the trusted value
+      x = TABLE_MAX_X - x2;      
+    }
+  }
+
+  
   sendJSON(x, y, z);
+  //sendJSON(x, y, z, x2, y2);
 }
 
 void sendJSON(float x, float y, float z) {
     String s = "{ \"x\":" + String(x) + ", \"y\":" + String(y) + ", \"z\":"  + String(z) +"}";
+    Serial.println(s);
+}
+
+void sendJSON(float x, float y, float z, float x2, float y2) {
+    String s = "{ \"x\":" + String(x) + ", \"y\":" + String(y) + ", \"z\":"  + String(z) + ", \"x2\":"  + String(x2) + ", \"y2\":"  + String(y2) +"}";
     Serial.println(s);
 }
 
@@ -72,7 +96,7 @@ float messureSingle(int trigPin, int echoPin) {
   // Collect samples
   for(int i=0; i< SAMPLES_PER_MEASURE; i++) {
     ave.push(dist(trigPin, echoPin));
-    delay(20);
+    delay(float(SAMPLE_INTERVAL) / SAMPLES_PER_MEASURE / 4);
   }
   return ave.mode();
 }
