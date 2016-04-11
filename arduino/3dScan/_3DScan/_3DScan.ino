@@ -26,7 +26,7 @@ const float TABLE_WIDTH = 1020.0;     // Width of table in MM
 const float TABLE_DEPTH = 610.0;      // Depth of table in MM
 const float TABLE_HEIGHT = 215.0;     // Height of table in MM (sensor to floor)
 const int   MEASURE_INTERVAL = 200;   // Period between meassurements
-const int   SAMPLES_PER_MEASURE = 15; // Number of samples used to create a messurement
+const int   SAMPLES_PER_MEASURE = 10; // Number of samples used to create a messurement
 const int   BAUD_RATE = 9600;         // Serial comms rate
 
 // TMP storage vars
@@ -77,9 +77,9 @@ void reportSettings() {
 
 
 void loop() {  
-  float x1 = CARRAIGE_WIDTH/2 + messure(trigPinX, echoPinX);
-  float x2 = CARRAIGE_WIDTH/2 + messure(trigPinX2, echoPinX2);
-  float y1 = CARRAIGE_WIDTH/2 + messure(trigPinY, echoPinY);  
+  float x1 = (CARRAIGE_WIDTH/2) + messure(trigPinX, echoPinX);
+  float x2 = (CARRAIGE_WIDTH/2) + messure(trigPinX2, echoPinX2);
+  float y1 = (CARRAIGE_WIDTH/2) + messure(trigPinY, echoPinY);  
   float y2 = 0.0;
   
   float x  = 0;
@@ -101,10 +101,12 @@ void loop() {
     float diff_x2 = abs(prev_x2 - x2);
     // Which value is closest to the last good reading
     if (diff_x1 < diff_x2) {
-      // Do nothing i.e. use x as the trusted value
+      // Use x as the trusted value
+      x = x1;
     } else {
       // Use X2 as the trusted value
-      x = TABLE_WIDTH - x2;      
+      //x = TABLE_WIDTH - x2;      
+      x = prev_x1;
     }
   }
 
