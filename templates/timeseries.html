@@ -5,7 +5,6 @@
     <script src="/static/js/c3.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
-        var zoffset = 21;
         var maxHistory = 250;
         var matrix = {}
         var global_data = {
@@ -17,17 +16,14 @@
 
         // Update the global data
         var updateGlobalData= function(newData) {
-            global_data.time_axis.push(newData.timestamp)
-            global_data.data_x.push(newData.data.x)
-            global_data.data_y.push(newData.data.y)
-            global_data.data_z.push(Math.max(zoffset - newData.data.z, 0))
-
-
+            global_data.time_axis.push(newData.timestamp);
+            global_data.data_x.push(newData.data.x);
+            global_data.data_y.push(newData.data.y);
+            global_data.data_z.push(newData.data.z);
             if (global_data.time_axis.length > maxHistory) global_data.time_axis.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_x.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_y.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_z.shift();
-            console.log(global_data.time_axis.length);
             updateCharts();
         }
 
@@ -65,19 +61,13 @@
 
         $(document).ready(function() {
 
-            // Set the offset
-            var tmp = prompt("Please enter a Z offset", zoffset);
-            if (tmp != null) {
-                zoffset = parseInt(tmp);
-            }
-
             // Chart 1
             chart1 = c3.generate({
                  bindto: '#chart',
                  axis: {
                    y: {
-                     max: zoffset,
-                     min: zoffset,
+                     max: 300,
+                     min: 300,
                    }
                  },
                  data: {

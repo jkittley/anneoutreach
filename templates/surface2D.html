@@ -5,7 +5,6 @@
     <script src="/static/js/c3.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
-        var zoffset = 21;
         var chartX = null;
         var chartY = null;
 
@@ -19,14 +18,15 @@
 
         var table_width = {{ table_width }};
         var table_depth = {{ table_depth }};
-        var matrix_x = init_matrix(table_width);
-        var matrix_y = init_matrix(table_depth);
+        var table_height = {{ table_height }};
+        var matrix_x = init_matrix(table_width/10);
+        var matrix_y = init_matrix(table_depth/10);
 
         // Update the global data
         var updateGlobalData= function(newData) {
-            var x = parseInt(newData.data.x);
-            var y = parseInt(newData.data.y);
-            var z = zoffset - parseInt(newData.data.z);
+            var x = parseInt(newData.data.x / 10);
+            var y = parseInt(newData.data.y / 10);
+            var z = parseInt(newData.data.z / 10);
             if (z<0) z = 0;
             matrix_x[x] = z;
             matrix_y[y] = z;
@@ -42,18 +42,12 @@
         // On load
         $(document).ready(function() {
 
-            // Set the offset
-            var tmp = prompt("Please enter a Z offset", zoffset);
-            if (tmp != null) {
-                zoffset = parseInt(tmp);
-            }
-
             // Chart X
             chartX = c3.generate({
                  bindto: '#chartX',
                  axis: {
                    y: {
-                     max: zoffset
+                     max: table_height/10
                    }
                  },
                  data: {
@@ -74,8 +68,14 @@
                  bindto: '#chartY',
                  axis: {
                    y: {
-                     max: zoffset
-                   }
+                       max: table_height/10
+                   },
+                  x: {
+                    tick: {
+                      fit: true
+                    }
+                  }
+
                  },
                  data: {
                      columns: [['data1'].concat(matrix_y)],

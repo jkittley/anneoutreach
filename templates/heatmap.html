@@ -30,7 +30,7 @@
             var dataPoint = {
                 x: parseInt((newdata.data.x / table_width) * cw),
                 y: parseInt((newdata.data.y / table_depth) * ch),
-                value: newdata.data.z,
+                value: newdata.data.z
             };
             heatmapInstance.addData(dataPoint);
             if (newdata.data.z > max) {

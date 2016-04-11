@@ -5,17 +5,17 @@
     <script type="text/javascript" charset="utf-8">
 
         // Global data used by all charts and outputs
-        var zoffset = 21;
         var matrix  = {};
         var graph = null;
         maxX = {{ table_width }};
         maxY = {{ table_depth }};
+        maxZ = {{ table_height }};
 
         // Update the global data
         var updateGlobalData= function(newData) {
-            var x = parseInt(newData.data.x);
-            var y = parseInt(maxY - newData.data.y);
-            var z = zoffset - parseInt(newData.data.z);
+            var x = parseInt(newData.data.x / 10);
+            var y = parseInt((maxY - newData.data.y) / 10);
+            var z = parseInt(newData.data.z / 10);
             if (z<0) z = 0;
             matrix[x+','+y] = z;
         };
@@ -23,8 +23,8 @@
         // Make a surface from the matrix data
         var makeSurface = function() {
             var surface = [];
-            for (var x = 0; x < maxX; x++) {
-                for (var y = 0; y < maxY; y++) {
+            for (var x = 0; x < maxX/10; x++) {
+                for (var y = 0; y < maxY/10; y++) {
                     var value = getFromMatrix(x, y);
                     surface.push({ x: x, y: y, z: value, style: value });
                 }
@@ -71,7 +71,7 @@
                 showShadow: false,
                 keepAspectRatio: true,
                 verticalRatio: 0.5,
-                zMax: zoffset,
+                zMax: maxZ/10,
                 cameraPosition: {
                     horizontal: 0,
                     vertical: 0.85,
@@ -87,12 +87,6 @@
 
         // On document ready
         $(document).ready(function() {
-
-            // Set the offset
-            var tmp = prompt("Please enter a Z offset", zoffset);
-            if (tmp != null) {
-                zoffset = parseInt(tmp);
-            }
 
             drawVisualization();
             // Web socket setup

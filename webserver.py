@@ -54,12 +54,12 @@ def surface3D():
 # Spotlight plot
 @app.route('/spotlight')
 def spotlight():
-    return render_template('spotlight.html')
+    return render_template('spotlight.html', trail=False)
 
 # Trail plot
 @app.route('/trail')
 def trail():
-    return render_template('trail.html')
+    return render_template('spotlight.html', trail=True)
 
 # Trail plot
 @app.route('/heatmap')
@@ -69,7 +69,7 @@ def heatmap():
 # Default context vars for all templates
 @app.context_processor
 def inject_defaults():
-    return { "table_width": TABLE_WIDTH, 'table_depth': TABLE_DEPTH }
+    return { "table_width": TABLE_WIDTH, 'table_depth': TABLE_DEPTH, 'table_height': TABLE_HEIGHT }
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -106,7 +106,7 @@ def handle_message(message):
 @socketio.on('new_serial_data')
 def handle_json(json):
     send_json(json)
-    print('received json: ' + str(json))
+    # print('received json: ' + str(json))
 
 #
 # Send Message

@@ -24,9 +24,9 @@ const int   TOLLERENCE_Y  = 150;      // If you add y and y2 how far from table 
 const float CARRAIGE_WIDTH = 60.0;    // Width of carraige in MM
 const float TABLE_WIDTH = 1020.0;     // Width of table in MM
 const float TABLE_DEPTH = 610.0;      // Depth of table in MM
-const float TABLE_HEIGHT = 210.0;     // Height of table in MM (sensor to floor)
+const float TABLE_HEIGHT = 215.0;     // Height of table in MM (sensor to floor)
 const int   MEASURE_INTERVAL = 200;   // Period between meassurements
-const int   SAMPLES_PER_MEASURE = 5;  // Number of samples used to create a messurement
+const int   SAMPLES_PER_MEASURE = 15; // Number of samples used to create a messurement
 const int   BAUD_RATE = 9600;         // Serial comms rate
 
 // TMP storage vars
@@ -84,7 +84,7 @@ void loop() {
   
   float x  = 0;
   float y  = y1;
-  float z  = messure(trigPinZ, echoPinZ) - TABLE_HEIGHT;
+  float z  = TABLE_HEIGHT - messure(trigPinZ, echoPinZ);
 
   bool xest = false;
   bool yest = false;
@@ -108,6 +108,10 @@ void loop() {
     }
   }
 
+  // Prevent negative values
+  if (x<0) x = 0;
+  if (y<0) y = 0;
+  if (z<0) z = 0;
   sendJSON(x, y, z, x1, y1, x2, y2, xest, yest);
 }
 
@@ -125,7 +129,7 @@ void sendJSON(float x, float y, float z, float x1, float y1, float x2, float y2,
     s += "\"y2\":"  + String(y2) + ",";
 
     s += "\"xest\":"  + String(xest) + ",";
-    s += "\"yest\":"  + String(yest) + ",";
+    s += "\"yest\":"  + String(yest);
     
     s += "}";
     Serial.println(s);
