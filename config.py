@@ -17,7 +17,7 @@ WEB_SERVER = {
 SECRET_KEY = 'MY_SECRET_KEY'
 
 # Interval between samples (in milliseconds)
-SAMPLE_INTERVAL = 50
+SAMPLE_INTERVAL = 200
 
 # Serial rate
 SERIAL_RATE = 9600
