@@ -17,12 +17,22 @@
         // Update the global data
         var updateGlobalData= function(newData) {
             global_data.time_axis.push(newData.timestamp);
-            global_data.data_x.push(newData.data.x);
-            global_data.data_y.push(newData.data.y);
-            global_data.data_z.push(newData.data.z);
+            //global_data.data_x.push(newData.data.x);
+            //global_data.data_y.push(newData.data.y);
+
+            var z = newData.data.z;
+
+            // Smooth the data
+            if (global_data.data_z.length > 0) {
+                var prev = global_data.data_z[global_data.data_z.length-1];
+                global_data.data_z.push((prev + z) / 2);
+            } else {
+                global_data.data_z.push(z);
+            }
+
             if (global_data.time_axis.length > maxHistory) global_data.time_axis.shift();
-            if (global_data.time_axis.length > maxHistory) global_data.data_x.shift();
-            if (global_data.time_axis.length > maxHistory) global_data.data_y.shift();
+            //if (global_data.time_axis.length > maxHistory) global_data.data_x.shift();
+            //if (global_data.time_axis.length > maxHistory) global_data.data_y.shift();
             if (global_data.time_axis.length > maxHistory) global_data.data_z.shift();
             updateCharts();
         }
@@ -61,22 +71,27 @@
 
         $(document).ready(function() {
 
-            // Chart 1
+            $('#chart').height($('body').height());
+
             chart1 = c3.generate({
                  bindto: '#chart',
                  axis: {
                    y: {
                      max: 300,
-                     min: 300,
+
                    }
                  },
                  data: {
                      names: {
-{#                        data_x: 'X (Left to right)',#}
-{#                        data_y: 'Y (Back to front)',#}
                         data_z: 'Z (Up and down)'
                      },
-                     columns: buildChart1Data()
+                     columns: buildChart1Data(),
+                     types: {
+                        data_z: 'area'
+                    },
+                     colors: {
+                        data_z: '#514027'
+                      }
                  },
             });
 
@@ -90,6 +105,16 @@
 
 {% block style %}
     <link rel="stylesheet" href="/static/css/c3.css" type="text/css"/>
+    <style>
+        html {
+            height: 99%;
+        }
+        body {
+            height: 99%;
+            background-color: #bff0ff;
+        }
+
+    </style>
 {% endblock %}
 
 {% block content %}
