@@ -49,17 +49,29 @@
 <style>
 body{
     background-color: black;
-    background-image: url("/static/img/water.gif");
     overflow: hidden;
+    {# background-image: url("/static/img/water.gif");#}
 }
 #canvas{
     width: 100vw;
     height: 100vh;
 }
+#water {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: url("/static/img/water.gif");
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999999;
+    opacity: 0.4;
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
     <canvas id="canvas"></canvas>
+    <div id="water"></div>
 {% endblock %}
 

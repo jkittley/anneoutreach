@@ -23,6 +23,8 @@
                 '.8': 'red',
                 '.95': 'white'
               },
+            min: 0,
+            max: 300,
         });
 
         // Web socket setup
@@ -33,10 +35,10 @@
                 value: newdata.data.z
             };
             heatmapInstance.addData(dataPoint);
-            if (newdata.data.z > max) {
-                max = newdata.data.z;
-                heatmapInstance.setDataMax(newdata.data.z);
-            }
+{#            if (newdata.data.z > max) {#}
+{#                max = newdata.data.z;#}
+{#                heatmapInstance.setDataMax(newdata.data.z);#}
+{#            }#}
         });
         sm.connect();
 
