@@ -34,7 +34,7 @@ int prev_x1 = 0;
 int prev_x2 = 0;
 int prev_y1 = 0;
 int prev_y2 = 0;
-Average<float> ave(SAMPLES_PER_MEASURE);
+
 
 void setup() {
   // initialize serial
@@ -75,77 +75,76 @@ void reportSettings() {
   Serial.println(s);
 }
 
+int sampleCounter = 0;
+float best_x_diff  = -1;
+float pause = MEASURE_INTERVAL / SAMPLES_PER_MEASURE / 5;
+float x  = 0;
+float y  = 0;
+float z  = 0;
+Average<float> ave_y(SAMPLES_PER_MEASURE);
+Average<float> ave_z(SAMPLES_PER_MEASURE);
 
 void loop() {  
-  float x1 = (CARRAIGE_WIDTH/2) + messure(trigPinX, echoPinX);
-  float x2 = (CARRAIGE_WIDTH/2) + messure(trigPinX2, echoPinX2);
-  float y1 = (CARRAIGE_WIDTH/2) + messure(trigPinY, echoPinY);  
+  float x1 = (CARRAIGE_WIDTH/2) + dist(trigPinX, echoPinX);
+  delay(pause);
+  float x2 = (CARRAIGE_WIDTH/2) + dist(trigPinX2, echoPinX2);
+  delay(pause);
+  float y1 = (CARRAIGE_WIDTH/2) + dist(trigPinY, echoPinY);  
+  delay(pause);
   float y2 = 0.0;
+  delay(pause);
+  float z1 = TABLE_HEIGHT - dist(trigPinZ, echoPinZ);
+  delay(pause);
   
-  float x  = 0;
-  float y  = y1;
-  float z  = TABLE_HEIGHT - messure(trigPinZ, echoPinZ);
+  ave_y.push(floor(y1));
+  ave_z.push(floor(z1));
 
-  bool xest = false;
-  bool yest = false;
-  
-  if (abs(x1 + x2 - TABLE_WIDTH) < TOLLERENCE_X) {
-    // Reading is good
-    prev_x1 = x1;
-    prev_x2 = x2;
+  // Get best X
+  float diff_x = floor(abs(x1-x2));
+  if (best_x_diff == -1 || diff_x < best_x_diff) {
+    best_x_diff = diff_x;
     x = x1;
-  } else {
-    // Reading is bad
-    xest = true;
-    float diff_x1 = abs(prev_x1 - x1);
-    float diff_x2 = abs(prev_x2 - x2);
-    // Which value is closest to the last good reading
-    if (diff_x1 < diff_x2) {
-      // Use x as the trusted value
-      x = x1;
-    } else {
-      // Use X2 as the trusted value
-      //x = TABLE_WIDTH - x2;      
-      x = prev_x1;
-    }
   }
 
-  // Prevent negative values
-  if (x<0) x = 0;
-  if (y<0) y = 0;
-  if (z<0) z = 0;
-  sendJSON(x, y, z, x1, y1, x2, y2, xest, yest);
+  // Return X, Y, Z when all samples taken
+  if (sampleCounter == SAMPLES_PER_MEASURE) {
+    // Average ones
+    y = ave_y.mode();
+    z = ave_z.mode();
+    // Prevent negative values
+    if (x<0) x = 0;
+    if (y<0) y = 0;
+    if (z<0) z = 0;
+    sendJSON(x, y, z, x1, y1, x2, y2);
+    // Reset
+    sampleCounter = 0;
+    x = 0;
+    y = 0;
+    z = 0;
+    best_x_diff = -1;    
+  }
+  sampleCounter++;
 }
 
+
+
 // Output the sensor data
-void sendJSON(float x, float y, float z, float x1, float y1, float x2, float y2, bool xest, bool yest) {
+void sendJSON(float x, float y, float z, float x1, float y1, float x2, float y2) {
     String s = "{";
-    s += "\"x\":"   + String(x)  + ",";
-    s += "\"y\":"   + String(y)  + ",";
-    s += "\"z\":"   + String(z)  + ",";
-
-    s += "\"x1\":"  + String(x1) + ",";
-    s += "\"y1\":"  + String(y1) + ",";
-    
-    s += "\"x2\":"  + String(x2) + ",";
-    s += "\"y2\":"  + String(y2) + ",";
-
-    s += "\"xest\":"  + String(xest) + ",";
-    s += "\"yest\":"  + String(yest);
+    // Basics
+    s += "\"x\":"     + String(int(floor(x)))     + ",";
+    s += "\"y\":"     + String(int(floor(y)))     + ",";
+    s += "\"z\":"     + String(int(floor(z)))     + ",";
+    // Debug
+    s += "\"x1\":"    + String(x1)    + ",";
+    s += "\"y1\":"    + String(y1)    + ",";
+    s += "\"x2\":"    + String(x2)    + ",";
+    s += "\"y2\":"    + String(y2);
     
     s += "}";
     Serial.println(s);
 }
 
-float messure(int trigPin, int echoPin) {
-  ave.clear();
-  // Collect samples
-  for(int i=0; i< SAMPLES_PER_MEASURE; i++) {
-    ave.push(dist(trigPin, echoPin));
-    delay(float(MEASURE_INTERVAL) / SAMPLES_PER_MEASURE / 4);
-  }
-  return ave.mode();
-}
 
 float dist(int trigPin, int echoPin) {
     digitalWrite(trigPin, LOW);
