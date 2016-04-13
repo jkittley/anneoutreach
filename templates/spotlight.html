@@ -20,7 +20,11 @@
         var PI2 = Math.PI*2;
 
         var img = new Image();
+        {% if not trail %}
         img.src = "/static/img/spotlight.jpg";
+        {% else %}
+        img.src = "/static/img/trail.jpg";
+        {% endif %}
 
         function draw(){
             {% if not trail %}ctx.clearRect(0,0,cw,ch);{% endif %}
