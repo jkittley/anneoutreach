@@ -32,7 +32,9 @@ def index():
         {"name": "3D Surface" , "url": "/surface3D" },
         {"name": "Spotlight" , "url": "/spotlight" },
         {"name": "Trail" , "url": "/trail" },
-        {"name": "Heatmap" , "url": "/heatmap" }
+        {"name": "Heatmap" , "url": "/heatmap" },
+        {"name": "Contour 2D" , "url": "/contour2D" },
+        {"name": "Contour 3D" , "url": "/contour3D" }
     ]
     return render_template('index.html', menu=menu)
 
@@ -65,6 +67,17 @@ def trail():
 @app.route('/heatmap')
 def heatmap():
     return render_template('heatmap.html')
+
+# contour2D
+@app.route('/contour2D')
+def contour2D():
+    return render_template('contour2D.html')
+
+# contour3D
+@app.route('/contour3D')
+def contour3D():
+    return render_template('contour3D.html')
+
 
 # Default context vars for all templates
 @app.context_processor

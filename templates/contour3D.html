@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block script %}
+    <script src="static/js/highcharts.src.js"></script>
+    <script src="static/js/highcharts-3d.src.js"></script>
+    <script src="static/js/heatmap.src.js"></script>
+    <script src="static/js/highcharts-contour.js"></script>
+    <script src="static/js/delaunay.js"></script>
+
+    <script>
+        var table_width = parseInt({{ table_width }}/10);
+        var table_depth = parseInt({{ table_depth }}/10);
+        var table_height = parseInt({{ table_height }}/10);
+
+        var xAxisMin = 0,
+            xAxisMax = table_width;
+        var yAxisMin = 0,
+            yAxisMax = table_height;
+        var zAxisMin = 0,
+            zAxisMax = table_depth;
+
+        var matrix = [];
+        for (var x = 0; x <= table_width; x++) {
+            matrix[x] = [];
+            for (var y = 0; y <= table_depth; y++) {
+                matrix[x][y] = null;
+            }
+        }
+
+        function makeInitData() {
+            var data = [];
+            for (var x = 0; x <= matrix.length; x +=2) {
+                for (var y = 0; y <= matrix[x].length; y += 2) {
+                    data.push({
+                        x: x,
+                        z: y,
+                        y: matrix[x][y],
+                        value: matrix[x][y],
+                    });
+                }
+            }
+            return data;
+        }
+
+        var chart;
+
+        $(document).ready(function() {
+
+            var stops = [];
+            var num_tones = 16;
+            for (var i = 0; i < num_tones; i++) {
+                var tone = Math.round(255 - 255 * i / (num_tones - 1));
+                tone = 'rgb(' + tone + ',' + tone + ',' + tone + ')';
+                stops.push([(i + 0) / (num_tones), tone]);
+                stops.push([(i + 1) / (num_tones), tone]);
+            }
+
+            // Set up the chart
+            chart = new Highcharts.Chart({
+                chart: {
+                    //inverted: true,
+                    renderTo: 'container',
+                    width: $('body').width(),
+                    height: $('body').height(),
+                    margin: 100,
+                    type: 'contour',
+                    options3d: {
+                        enabled: true,
+                        alpha: 30,
+                        beta: 0,
+                        depth: 600,
+                        viewDistance: 1,
+                        frame: {
+                            bottom: {
+                                size: 10,
+                                color: '#eecccc'
+                            },
+                            back: {
+                                size: 10,
+{#                                color: '#cceecc'#}
+                            },
+                            side: {
+                                size: 0,
+{#                                color: '#ccccee'#}
+                            }
+                        }
+                    }
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: ''
+                },
+                plotOptions: {
+                    scatter: {
+                        width: 10,
+                        height: 10,
+                        depth: 10
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Axis-Y'
+                    },
+                    min: yAxisMin,
+                    max: yAxisMax
+                },
+                xAxis: {
+                    title: {
+                        text: 'Axis-X'
+                    },
+                    min: xAxisMin,
+                    max: xAxisMax
+                },
+                zAxis: {
+                    min: zAxisMin,
+                    max: zAxisMax
+                },
+                colorAxis: {
+                    stops: stops,
+                },
+                legend: {
+                    enabled: false
+                },
+                tooltip: {
+                    nearest: true,
+                },
+                series: [{
+                    name: 'Reading',
+                    colorByPoint: true,
+                    data: makeInitData(),
+                    turboThreshold: 0,
+                }]
+            });
+
+
+            // Add mouse events for rotation
+            $(chart.container).bind('mousedown.hc touchstart.hc', function (e) {
+                e = chart.pointer.normalize(e);
+
+                var posX = e.pageX,
+                    posY = e.pageY,
+                    alpha = chart.options.chart.options3d.alpha,
+                    beta = chart.options.chart.options3d.beta,
+                    newAlpha,
+                    newBeta,
+                    sensitivity = 5; // lower is more sensitive
+
+                $(document).bind({
+                    'mousemove.hc touchdrag.hc': function (e) {
+
+                        var xAxis = chart.xAxis[0];
+                        var yAxis = chart.yAxis[0];
+                        var zAxis = chart.zAxis[0];
+
+                        // Run beta
+                        newBeta = beta + (posX - e.pageX) / sensitivity;
+                        newBeta = Math.min(90, Math.max(-90, newBeta));
+                        chart.options.chart.options3d.beta = newBeta;
+                        yAxis.update({
+                            opposite: Math.sin(newBeta * Math.PI / 180) < 0
+                        }, false);
+
+                        // Run alpha
+                        newAlpha = alpha + (e.pageY - posY) / sensitivity;
+                        newAlpha = Math.min(90, Math.max(-90, newAlpha));
+                        chart.options.chart.options3d.alpha = newAlpha;
+                        xAxis.update({
+                            opposite: Math.sin(newAlpha * Math.PI / 180) < 0
+                        }, false);
+                        zAxis.update({
+                            opposite: Math.sin(newAlpha * Math.PI / 180) < 0
+                        }, false);
+
+                        chart.redraw(false);
+                    },
+                        'mouseup touchend': function () {
+                        $(document).unbind('.hc');
+                    }
+                });
+            });
+
+
+
+            // Web socket setup
+            sm = new SocketManager(function (newdata) {
+                matrix[parseInt(newdata.data.x / 10)][parseInt(newdata.data.y / 10)] = parseInt(newdata.data.z / 10);
+
+                chart.series[0].addPoint({
+                        x: parseInt(newdata.data.x / 10),
+                        z: parseInt(newdata.data.y / 10),
+                        y: parseInt(newdata.data.z / 10),
+                        value: parseInt(newdata.data.z / 10)
+                }, true, true);
+
+            });
+            sm.connect();
+        });
+
+</script>
+
+{% endblock %}
+
+{% block style %}
+    <style>
+    html, body, #container {
+        width: 100%;
+        height: 100%;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+        <div id="container" style="height: 500px; width:500px"></div>
+{% endblock %}
+

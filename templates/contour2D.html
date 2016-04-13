@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block script %}
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/maps/modules/map.js"></script>
+    <script src="http://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://rawgithub.com/paulo-raca/highcharts-contour/master/highcharts-contour.js"></script>
+
+    <script>
+        var table_width = Math.ceil({{ table_width }}/10);
+        var table_depth = Math.ceil({{ table_depth }}/10);
+        var table_height = Math.ceil({{ table_height }}/10);
+
+        var res = 11;
+        var xAxisMin = 0,
+            xAxisMax = table_width;
+        var yAxisMin = 0,
+            yAxisMax = table_height;
+
+
+        var matrix = [];
+        for (var x = 0; x <= table_width; x++) {
+            matrix[x] = [];
+            for (var y = 0; y <= table_depth; y++) {
+                matrix[x][y] = null;
+            }
+        }
+
+        function makeInitData() {
+            var res = 11;
+            var data = [];
+            for (var i = 0; i < res; i++) {
+                for (var j = 0; j < res; j++) {
+                    var x = 200 * (i / (res - 1)) - 100;
+                    var y = 200 * (j / (res - 1)) - 100;
+                    var value = x * x - y * y;
+                    data.push([x, y, value]);
+                }
+            }
+        }
+{#            #}
+{#            var data = [];#}
+{#            for (var x = 0; x < matrix.length; x++) {#}
+{#                for (var y = 0; y < matrix[x].length; y++) {#}
+{#                    data.push([x, y, matrix[x][y]]);#}
+{#                }#}
+{#            }#}
+{#            return data;#}
+{#        }#}
+
+
+
+
+        var chart;
+        $(document).ready(function() {
+
+
+            var stops = [];
+            var num_tones = 16;
+            for (var i=0; i<num_tones; i++) {
+                var tone = Math.round(255-255*i/(num_tones-1));
+                tone = 'rgb('+ tone + ',' + tone + ',' + tone + ')';
+                stops.push([(i+0)/(num_tones), tone]);
+                stops.push([(i+1)/(num_tones), tone]);
+            }
+
+            // Set up the chart
+            chart = new Highcharts.Chart({
+                chart: {
+                    //inverted: true,
+                    renderTo: 'container',
+                    width: $('body').width(),
+                    height: $('body').height(),
+                    margin: 100,
+                    type: 'contour',
+                },
+                title: {
+                    text: ''
+                },
+                subtitle: {
+                    text: ''
+                },
+                yAxis: {
+                    title: {
+                        text: 'Axis-Y'
+                    },
+                    min: yAxisMin,
+                    max: yAxisMax
+                },
+                xAxis: {
+                    title: {
+                        text: 'Axis-X'
+                    },
+                    min: xAxisMin,
+                    max: xAxisMax
+                },
+                colorAxis: {
+                    stops: stops,
+                },
+                series: [{
+                    data: makeInitData(),
+                    grid_width: res,
+                }]
+            });
+
+
+
+
+
+
+            // Web socket setup
+            sm = new SocketManager(function (newdata) {
+                matrix[parseInt(newdata.data.x / 10)][parseInt(newdata.data.y / 10)] = parseInt(newdata.data.z / 10);
+                //chart.series[0].setData(makeInitData(), true, false);
+                chart.series[0].addPoint([
+                        parseInt(newdata.data.x / 10),
+                        parseInt(newdata.data.y / 10),
+                        parseInt(newdata.data.z / 10)
+                ])
+            });
+            sm.connect();
+        });
+
+</script>
+
+{% endblock %}
+
+{% block style %}
+    <style>
+    html, body, #container {
+        width: 100%;
+        height: 100%;
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+        <div id="container" style="height: 500px; width:500px"></div>
+{% endblock %}
+
