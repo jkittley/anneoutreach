@@ -6,7 +6,7 @@ This repo contains a basic framework which allows JSON encoded data to be transf
 capable dev board) to locally hosted website (on a Raspberry Pi). It uses web sockets to provide realtime updates. This
  code was required as part of a larger project whcih can be found here: http://thing.farm/ocean-scan. 
 
-## Setup 
+## Basic Setup 
 First of all I am going to assume you have a Raspberry Pi 3 with Raspbian installed and setup to connect to the internet.
 Older models of the Pi will work, but if you intend to use the Pi's browser to display a page, it is worth using the 
 latest model.
@@ -35,13 +35,13 @@ Move into the directory
 * cd ocean-scan
 
 Install all the python requirements
-* pip3 install -r requirements.txt
+* sudo pip3 install -r requirements.txt
 
 Copy all the files from the from useful_tools to the raspberry pi desktop 
-* cp useful_tools/*.sh ~/Desktop
+* sudo cp useful_tools/*.sh ~/Desktop
 
 You must then make the usefull tools executable
-* chmod +x ~/Desktop/*.sh
+* sudo chmod +x ~/Desktop/*.sh
 
 That's it, now we can launch the services.
 
@@ -54,6 +54,31 @@ or double click on the new icons on the desktop and choose execute in terminal
 Once the server is up and running you can open the browser and go to localhost to see the website or from a remote 
 machine you can enter the Raspberry Pi's IP address. The IP address can be discovered by double clicking on the 
 "whats_my_ip" useful tool now on the desktop  
+
+
+## Access Point Setup (Raspberry Pi 3 Only)
+If you want people to be able to access the hosted web pages via WiFi you can setup the Pi3 to act as a local Access Point.
+This section was modified from https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
+
+First we need to set a static IP address for wlan0
+* sudo nano /etc/dhcpcd.conf
+* Add the following to the bottom of the file:
+
+>interface wlan0  
+>    static ip_address=172.24.1.1/24
+
+Next we need to prevent wpa_supplicant from running and interfering with setting up wlan0 in access point mode.
+* sudo nano /etc/network/interfaces
+* Comment out the line that looks like:
+
+>allow-hotplug wlan0  
+>iface wlan0 inet manual  
+>\#   wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+Restart dhcpcd
+* sudo service dhcpcd restart
+
+
 
 
 
