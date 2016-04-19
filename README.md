@@ -60,7 +60,10 @@ machine you can enter the Raspberry Pi's IP address. The IP address can be disco
 If you want people to be able to access the hosted web pages via WiFi you can setup the Pi3 to act as a local Access Point.
 This section was modified from https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
 
-First we need to set a static IP address for wlan0
+First install the two packages required
+* sudo apt-get install dnsmasq hostapd
+
+Now we need to set a static IP address for wlan0
 * sudo nano /etc/dhcpcd.conf
 * Add the following to the bottom of the file:
 
@@ -78,7 +81,75 @@ Next we need to prevent wpa_supplicant from running and interfering with setting
 Restart dhcpcd
 * sudo service dhcpcd restart
 
+Configure HostAPD
+* sudo nano /etc/hostapd/hostapd.conf
 
+> /# This is the name of the WiFi interface we configured above
+> interface=wlan0
+> /# Use the nl80211 driver with the brcmfmac driver
+> driver=nl80211
+> /# This is the name of the network
+> ssid=Pi3-AP
+> /# Use the 2.4GHz band
+> hw_mode=g
+> /# Use channel 6
+> channel=6
+> /# Enable 802.11n
+> ieee80211n=1
+> /# Enable WMM
+> wmm_enabled=1
+> /# Enable 40MHz channels with 20ns guard interval
+> ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+> /# Accept all MAC addresses
+> macaddr_acl=0
+> /# Use WPA authentication
+> auth_algs=1
+> /# Require clients to know the network name
+> ignore_broadcast_ssid=0
+> /# Use WPA2
+> wpa=2
+> /# Use a pre-shared key
+> wpa_key_mgmt=WPA-PSK
+> /# The network passphrase
+> wpa_passphrase=raspberry
+> /# Use AES, instead of TKIP
+> rsn_pairwise=CCMP
 
+We can check if it's working at this stage by running sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf. 
+If it's all gone well thus far, you should be able to see to the network Pi3-AP! If you try connecting to it, 
+you will see some output from the Pi, but you won't receive and IP address until we set up dnsmasq in the next step. 
+Use Ctrl+C to stop it.
 
+We also need to tell hostapd where to look for the config file when it starts up on boot
+* sudo nano /etc/default/hostapd
+* find the line #DAEMON_CONF=""
+* replace it with DAEMON_CONF="/etc/hostapd/hostapd.conf"
 
+Configure DNSMASQ
+
+First move the config file out of the way
+* sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig  
+
+Now make a new one
+* sudo nano /etc/dnsmasq.conf
+* paste the following into the file
+
+> interface=wlan0      # Use interface wlan0  
+> bind-interfaces      # Bind to the interface to make sure we aren't sending things elsewhere  
+> server=8.8.8.8       # Forward DNS requests to Google DNS  
+> domain-needed        # Don't forward short names  
+> bogus-priv           # Never forward addresses in the non-routed address spaces.  
+> dhcp-range=172.24.1.50,172.24.1.150,12h # Assign IP addresses between 172.24.1.50 and 172.24.1.150 with a 12 hour lease time  
+
+One of the last things that we need to do before we send traffic anywhere is to enable packet forwarding.
+* sudo nano /etc/sysctl.conf
+* remove the # from the beginning of the line containing net.ipv4.ip_forward=1
+* save and reboot it:
+* sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward" 
+
+Start the services
+* sudo service hostapd start  
+* sudo service dnsmasq start
+
+Reboot the Pi
+* sudo reboot
