@@ -12,7 +12,7 @@ Older models of the Pi will work, but if you intend to use the Pi's browser to d
 latest model.
 
 First job is to make sure the file system is expanded to use the full capacity of the SD Card
-* Open terminal and type “rasps-config”. 
+* Open terminal and type “raspi-config”. 
 * Choose the “expand Filesystem” option and reboot the Pi
 
 Launch command line and run the following to insure the system is up-to-date
@@ -24,12 +24,9 @@ Next make sure you have the Epiphany browser installed
 Check you have Python 3 and Pip installed
 * sudo apt-get install python3-pip
 
-Move to the user directory
-* cd ~/
-
 Make a new directory for the web server and move into it
-* mkdir www 
-* cd www
+* mkdir ~/www 
+* cd ~/www
 
 Download the project code from github
 * git clone https://github.com/jkittley/ocean-scan.git
@@ -56,7 +53,7 @@ or double click on the new icons on the desktop and choose execute in terminal
 
 Once the server is up and running you can open the browser and go to localhost to see the website or from a remote 
 machine you can enter the Raspberry Pi's IP address. The IP address can be discovered by double clicking on the 
-"whats_my_ip" usefull tool now on the desktop  
+"whats_my_ip" useful tool now on the desktop  
 
 
 
