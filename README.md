@@ -84,6 +84,7 @@ Restart dhcpcd
 Configure HostAPD
 * sudo nano /etc/hostapd/hostapd.conf
 
+```
 \# This is the name of the WiFi interface we configured above.
 interface=wlan0
 
@@ -128,6 +129,7 @@ wpa_passphrase=raspberry
 
 \# Use AES, instead of TKIP.
 rsn_pairwise=CCMP
+```
 
 We can check if it's working at this stage by running sudo /usr/sbin/hostapd /etc/hostapd/hostapd.conf. 
 If it's all gone well thus far, you should be able to see to the network Pi3-AP! If you try connecting to it, 
