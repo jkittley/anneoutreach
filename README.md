@@ -8,8 +8,12 @@ capable dev board) to locally hosted website (on a Raspberry Pi). It uses web so
 
 ## Setup 
 First of all I am going to assume you have a Raspberry Pi 3 with Raspbian installed and setup to connect to the internet.
-Older models of the Pi will work, but if you intend to use the Pi's browser to display the page it is worth using the 
+Older models of the Pi will work, but if you intend to use the Pi's browser to display a page, it is worth using the 
 latest model.
+
+First job is to make sure the file system is expanded to use the full capacity of the SD Card
+* Open terminal and type “rasps-config”. 
+* Choose the “expand Filesystem” option and reboot the Pi
 
 Launch command line and run the following to insure the system is up-to-date
 * sudo apt-get update

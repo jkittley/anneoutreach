@@ -7,5 +7,11 @@ cd ~/www/ocean-scan/
 git fetch --all
 git reset --hard origin/master
 
+echo "Updates downloaded"
+echo "Moving useful tools"
+
+cp -i useful_tools/* ~/Desktop/
+chmod +x ~/Desktop/*.sh
+
 echo "Done! Press enter to close window"
 read

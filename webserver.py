@@ -128,10 +128,11 @@ def handle_json(json):
 def send_json(jsondata):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # Only send json strings with x,y,z values to javacript
+    data = { 'timestamp': timestamp, 'data': jsondata }
     if 'x' in jsondata and 'y' in jsondata:
-        socketio.emit('update', { 'timestamp': timestamp, 'data': jsondata })
+        socketio.emit('update', data)
     else:
-        socketio.emit('other', { 'timestamp': timestamp, 'data': jsondata })
+        socketio.emit('other', data)
 
 #
 # Start App
