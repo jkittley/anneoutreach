@@ -91,7 +91,7 @@ interface=wlan0
 driver=nl80211
 
 \# This is the name of the network.
-ssid=Pi3-AP
+ssid=Ocean-Scan
 
 \# Use the 2.4GHz band.
 hw_mode=g
