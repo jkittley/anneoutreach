@@ -10,7 +10,8 @@ git reset --hard origin/master
 echo "Updates downloaded"
 echo "Moving useful tools"
 
-sudo cp -i useful_tools/* ~/Desktop/
+yes | sudo cp -i useful_tools/* ~/Desktop/
+
 sudo chmod +x ~/Desktop/*.sh
 
 echo "Done! Press enter to close window"
