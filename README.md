@@ -162,12 +162,19 @@ Now make a new one
 * sudo nano /etc/dnsmasq.conf
 * paste the following into the file
 
-> interface=wlan0      # Use interface wlan0  
-> bind-interfaces      # Bind to the interface to make sure we aren't sending things elsewhere  
-> server=8.8.8.8       # Forward DNS requests to Google DNS  
-> domain-needed        # Don't forward short names  
-> bogus-priv           # Never forward addresses in the non-routed address spaces.  
-> dhcp-range=172.24.1.50,172.24.1.150,12h # Assign IP addresses between 172.24.1.50 and 172.24.1.150 with a 12 hour lease time  
+```
+# Use interface wlan0  
+interface=wlan0      
+
+# Bind to the interface to make sure we aren't sending things elsewhere  
+bind-interfaces 
+
+# Forward al domains to local webserver
+address=/#/172.24.1.1 
+
+# Assign IP addresses between 172.24.1.50 and 172.24.1.150 with a 12 hour lease time 
+dhcp-range=172.24.1.50,172.24.1.150,12h  
+```
 
 One of the last things that we need to do before we send traffic anywhere is to enable packet forwarding.
 * sudo nano /etc/sysctl.conf
@@ -181,3 +188,5 @@ Start the services
 
 Finally reboot the Pi
 * sudo reboot
+
+Now you should be able to connect to the Pi via WiFi. Navigate to http://ocean.scan in the browser and you should see the website.
