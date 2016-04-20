@@ -4,19 +4,45 @@
 {% endblock %}
 
 {% block style %}
+<style>
+    .option {
+        background-size: cover;
+        min-height: 200px;
+        width: 100%;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <h1>Main Menu</h1>
-        {% for item in menu %}
-        <div id="row">
-            <div id="col-md-12"><a href="{{ item.url }}" class="btn btn-block btn-primary">{{ item.name }}</a></div>
+        <br>
+        <div class="row">
+            <div class="col-md-11"><span class="lead">Ocean-Scan</span></div>
+            <div class="col-md-1 text-right"><a class="btn btn-sm btn-warning" data-toggle="modal" data-target="#settingsModal">Settings</a></div>
         </div>
-        <hr>
-        {% endfor %}
-        <div id="row">
-            <div id="col-md-12"><a href="/settings" class="btn btn-block btn-warning">Settings</a></div>
+        <hr/>
+        <div class="row">
+
+            {% for item in menu %}
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                  <div class="panel-heading"><a href="{{ item.url }}">{{ item.name }}</a></div>
+                    <div class="panel-body option" style="background-image: url(/static/img/vis_thumbs/{{ item.img }})">
+                    </div>
+                    <img src=""/>
+                    <div class="panel-footer"><a href="{{ item.url }}" class="btn btn-block btn-primary">Open: {{ item.name }}</a></div>
+                </div>
+            </div>
+            {% endfor %}
+
         </div>
+
+        <div class="alert alert-info" role="alert">To open visualisation settings, double click when viewing any of the visualisations.</div>
+    <hr>
+
     </div>
+{% endblock %}
+
+{% block settings_body %}
+    To open visualisation settings, double click when viewing any of the visualisations.
 {% endblock %}

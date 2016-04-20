@@ -27,14 +27,14 @@ socketio = SocketIO(app)
 @app.route('/')
 def index():
     menu = [
-        {"name": "Time Series" , "url": "/time" },
-        {"name": "2D Surface" , "url": "/surface2D" },
-        {"name": "3D Surface" , "url": "/surface3D" },
-        {"name": "Spotlight" , "url": "/spotlight" },
-        {"name": "Trail" , "url": "/trail" },
-        {"name": "Heatmap" , "url": "/heatmap" },
-        {"name": "Contour 2D" , "url": "/contour2D" },
-        {"name": "Contour 3D" , "url": "/contour3D" }
+        {"name": "Time Series" , "url": "/time", "img": "timeseries.png" },
+        {"name": "2D Surface" , "url": "/surface2D", "img": "surface2D.png" },
+        {"name": "3D Surface" , "url": "/surface3D", "img": "surface3D.png" },
+        {"name": "Spotlight" , "url": "/spotlight", "img": "spotlight.png" },
+        {"name": "Trail" , "url": "/trail", "img": "trail.png" },
+        {"name": "Heatmap" , "url": "/heatmap", "img": "heatmap.png" },
+        {"name": "Contour 2D" , "url": "/contour2D", "img": "contour2D.png" },
+        {"name": "Contour 3D" , "url": "/contour3D", "img": "contour3D.png" }
     ]
     return render_template('index.html', menu=menu)
 
@@ -54,14 +54,34 @@ def surface3D():
     return render_template('surface3D.html')
 
 # Spotlight plot
-@app.route('/spotlight')
+@app.route('/spotlight', methods=['GET', 'POST'])
 def spotlight():
-    return render_template('spotlight.html', trail=False)
+    saveRoot = os.path.join(os.path.dirname(os.path.realpath(__file__)), app.config['UPLOAD_FOLDER'])
+    msg = None
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = "spotlight.jpg"
+            file.save(Path(saveRoot).child(filename))
+        else:
+            msg = 'Upload failed - Filename not allowed'
+    return render_template('spotlight.html', trail=False, msg=msg)
+
 
 # Trail plot
-@app.route('/trail')
+@app.route('/trail', methods=['GET', 'POST'])
 def trail():
-    return render_template('spotlight.html', trail=True)
+    saveRoot = os.path.join(os.path.dirname(os.path.realpath(__file__)), app.config['UPLOAD_FOLDER'])
+    msg = None
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = "trail.jpg"
+            file.save(Path(saveRoot).child(filename))
+        else:
+            msg = 'Upload failed - Filename not allowed'
+    return render_template('spotlight.html', trail=True, msg=msg)
+
 
 # Trail plot
 @app.route('/heatmap')
@@ -88,23 +108,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-@app.route('/settings', methods=['GET', 'POST'])
-def settings():
-    saveRoot = os.path.join(os.path.dirname(os.path.realpath(__file__)), app.config['UPLOAD_FOLDER'])
-    msg = ''
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            if "spotlight" in request.form:
-                filename = "spotlight.jpg"
-            elif "trail" in request.form:
-                filename = "trail.jpg"
-            else:
-                abort(500)
-            file.save(Path(saveRoot).child(filename))
-            msg = 'Image uploaded: '+filename
-
-    return render_template('settings.html', message=msg)
 
 # Message receivers
 #

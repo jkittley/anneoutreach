@@ -21,9 +21,9 @@
 
         var img = new Image();
         {% if not trail %}
-        img.src = "/static/img/spotlight.jpg";
+        img.src = "/static/img/spotlight.jpg?refresh=" + new Date().getTime();;
         {% else %}
-        img.src = "/static/img/trail.jpg";
+        img.src = "/static/img/trail.jpg?refresh=" + new Date().getTime();;
         {% endif %}
 
         function draw(){
@@ -67,7 +67,7 @@ body{
     background-image: url("/static/img/water.gif");
     width: 100vw;
     height: 100vh;
-    z-index: 999999999;
+    z-index: 999;
     opacity: 0.4;
 }
 
@@ -79,3 +79,12 @@ body{
     <div id="water"></div>
 {% endblock %}
 
+{% block settings_buttons %}
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="submit" class="btn btn-danger" value="Upload">Upload</button>
+{% endblock %}
+
+{% block settings_body %}
+    <p class="lead">Change the reveal image</p>
+    <input type=file name=file>
+{% endblock %}
